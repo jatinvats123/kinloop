@@ -1,14 +1,6 @@
 // Week strip: seven day pills with a mini bloom each; today is the black pill.
+import type { WeekDay } from "@/domain/types";
 import { DayBloom } from "./day-bloom";
-
-export interface WeekDay {
-  date: string;
-  weekday: string;
-  day: number;
-  total: number;
-  done: number;
-  isToday: boolean;
-}
 
 export function WeekStrip({
   days,

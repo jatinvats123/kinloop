@@ -33,6 +33,8 @@ export interface Circle {
   profile: HealthProfile;
   login: { failures: number; lockedUntil: string | null };
   quota: { aiDay: string; aiCount: number; mailDay: string; mailCount: number };
+  /** Demo circles only: sign-in details shown on the demo panel (fictional people, no real data). */
+  demoAccess?: Record<string, string>;
 }
 
 export interface Member {
@@ -99,4 +101,14 @@ export interface Slot {
   at: string;
   date: string;
   time: string;
+}
+
+/** One day in the week strip: how many slots were scheduled and how many were settled. */
+export interface WeekDay {
+  date: string;
+  weekday: string;
+  day: number;
+  total: number;
+  done: number;
+  isToday: boolean;
 }
