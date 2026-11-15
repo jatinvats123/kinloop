@@ -168,3 +168,13 @@ export interface Proposal {
   createdAt: string;
   decidedAt: string | null;
 }
+
+/** A cached AI draft for a visit brief, valid only while its input facts hash still matches. */
+export interface BriefDraft {
+  appointmentId: string;
+  /** SHA-256 of the facts the draft was written from. */
+  factsHash: string;
+  mention: string[];
+  questions: string[];
+  at: string;
+}

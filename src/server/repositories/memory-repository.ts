@@ -2,6 +2,7 @@
 import type {
   ActivityEntry,
   Appointment,
+  BriefDraft,
   Circle,
   DoseLog,
   FollowUp,
@@ -23,6 +24,7 @@ interface CircleData {
   notifications: Map<string, Notification>;
   followUps: Map<string, FollowUp>;
   proposals: Map<string, Proposal>;
+  briefs: Map<string, BriefDraft>;
 }
 
 const clone = <T>(v: T): T => structuredClone(v);
@@ -49,6 +51,7 @@ export class MemoryRepository implements Repository {
       notifications: new Map(),
       followUps: new Map(),
       proposals: byId(seed.proposals),
+      briefs: new Map(),
     });
     return true;
   }
@@ -233,6 +236,15 @@ export class MemoryRepository implements Repository {
     p.status = status;
     p.decidedAt = decidedAt;
     return before;
+  }
+
+  async getBriefDraft(code: string, appointmentId: string) {
+    const b = this.data(code)?.briefs.get(appointmentId);
+    return b ? clone(b) : null;
+  }
+
+  async putBriefDraft(code: string, draft: BriefDraft) {
+    this.data(code)?.briefs.set(draft.appointmentId, clone(draft));
   }
 
   async hitRateLimit(key: string, max: number, windowMs: number, now: Date) {

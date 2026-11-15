@@ -152,3 +152,15 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* Print (visit brief): white paper, no canvas, glow or navigation. */
+@media print {
+  body,
+  .dot-grid,
+  .bg-stage {
+    background: #fff !important;
+  }
+  .glow {
+    display: none !important;
+  }
+}

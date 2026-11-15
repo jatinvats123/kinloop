@@ -30,7 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="dot-grid min-h-dvh md:p-5">
       <div className="relative mx-auto flex min-h-dvh max-w-6xl flex-col overflow-hidden bg-stage pb-24 md:min-h-[calc(100dvh-2.5rem)] md:rounded-[2rem] md:pb-0">
         <div className="glow -right-32 -top-40 size-[28rem] opacity-70" aria-hidden="true" />
-        <header className="relative flex items-center justify-between gap-4 px-4 pt-4 sm:px-8 sm:pt-6">
+        <header className="relative flex print:hidden items-center justify-between gap-4 px-4 pt-4 sm:px-8 sm:pt-6">
           <Logo href={homeFor(ctx.member)} />
           <NavTabs items={nav} />
           <form action={signOutAction} className="flex items-center gap-3">
@@ -45,7 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </form>
         </header>
         {ctx.circle.isDemo ? (
-          <div className="relative px-4 pt-4 sm:px-8">
+          <div className="relative px-4 pt-4 sm:px-8 print:hidden">
             <DemoPanel
               circle={ctx.circle}
               members={members}

@@ -3,7 +3,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { CalendarDays, HeartHandshake, ScanLine } from "lucide-react";
+import { CalendarDays, FileText, HeartHandshake, ScanLine } from "lucide-react";
 import { setTextSizeAction } from "@/app/actions/prefs";
 import {
   decideProposalAction,
@@ -266,6 +266,13 @@ export default async function TodayPage() {
               {clockLabel(view.nextAppointment.at, circle.timezone)}
               {view.nextAppointment.location ? `, ${view.nextAppointment.location}` : ""}
             </p>
+            <Link
+              href={`/appointments/${view.nextAppointment.id}/brief`}
+              className={buttonClass("secondary", "lg", "mt-4")}
+            >
+              <FileText aria-hidden="true" size={20} />
+              {t("today.visitBrief")}
+            </Link>
           </div>
         ) : (
           <p className="mt-3 text-lg text-muted">{t("today.noAppointment")}</p>

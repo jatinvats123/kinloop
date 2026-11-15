@@ -3,6 +3,7 @@
 import type {
   ActivityEntry,
   Appointment,
+  BriefDraft,
   Circle,
   DoseLog,
   FollowUp,
@@ -99,6 +100,10 @@ export interface Repository {
     status: Exclude<ProposalStatus, "pending">,
     decidedAt: string,
   ): Promise<Proposal | null>;
+
+  /** The cached AI draft for an appointment's visit brief, if any. */
+  getBriefDraft(code: string, appointmentId: string): Promise<BriefDraft | null>;
+  putBriefDraft(code: string, draft: BriefDraft): Promise<void>;
 
   /**
    * Fixed-window rate limit: records a hit for `key` and returns whether it is within `max` hits

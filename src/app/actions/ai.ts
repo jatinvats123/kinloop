@@ -2,6 +2,7 @@
 // Server actions for the AI helpers. Each is called only on an explicit user action, rate-limited
 // per caller, and counted against the circle's daily AI quota inside the service.
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { clientKey, requireSession } from "@/server/auth/session";
 import { getAiClient } from "@/server/ai/client";
 import { readImage } from "@/server/ai/guards";
@@ -14,6 +15,8 @@ import {
   type MedicineDraft,
 } from "@/server/services/prescription-import";
 import { isProposal } from "@/server/services/proposals";
+import { draftVisitBrief } from "@/server/services/visit-brief";
+import type { BriefDraft } from "@/domain/types";
 import { formToObject } from "@/server/validation";
 
 const AI_PER_HOUR_PER_CALLER = 30;
@@ -68,6 +71,20 @@ export async function acceptDraftAction(_prev: ActionResult, fd: FormData): Prom
         ? `Sent to ${ctx.circle.elderName.split(" ")[0]} for approval.`
         : "Added to the medicines list.",
     };
+  } catch (err) {
+    return toActionError(err);
+  }
+}
+
+export async function draftBriefAction(
+  _prev: ActionResult<BriefDraft>,
+  fd: FormData,
+): Promise<ActionResult<BriefDraft>> {
+  try {
+    const ctx = await requireSession();
+    const id = z.string().min(1).max(64).parse(fd.get("appointmentId"));
+    await limitCaller(ctx.repo, ctx.now);
+    return { ok: true, data: await draftVisitBrief(ctx, id, getAiClient()) };
   } catch (err) {
     return toActionError(err);
   }

@@ -1,7 +1,7 @@
 // Upcoming doctor appointments with "Add to Google Calendar" links.
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarPlus, MapPin, Plus } from "lucide-react";
+import { CalendarPlus, FileText, MapPin, Plus } from "lucide-react";
 import { PageHeader, SavedNotice } from "@/components/common/page-header";
 import { buttonClass } from "@/components/ui/button";
 import { googleCalendarUrl } from "@/domain/calendar-link";
@@ -26,7 +26,7 @@ export default async function AppointmentsPage({
     <div>
       <PageHeader
         title="Visits"
-        intro="Upcoming doctor appointments. Reminders go out a day and two hours before."
+        intro="Upcoming doctor appointments. Reminders go out a day and two hours before. Open a visit brief to take to the doctor."
         action={
           canEdit ? (
             <Link href="/appointments/new" className={buttonClass("primary", "lg")}>
@@ -71,6 +71,10 @@ export default async function AppointmentsPage({
                   <CalendarPlus aria-hidden="true" size={18} />
                   Add to Google Calendar<span className="sr-only"> (opens in a new tab)</span>
                 </a>
+                <Link href={`/appointments/${a.id}/brief`} className={buttonClass("primary")}>
+                  <FileText aria-hidden="true" size={18} />
+                  Visit brief<span className="sr-only"> for {a.doctor}</span>
+                </Link>
                 {canEdit ? (
                   <Link href={`/appointments/${a.id}`} className={buttonClass("secondary")}>
                     Edit<span className="sr-only"> visit with {a.doctor}</span>

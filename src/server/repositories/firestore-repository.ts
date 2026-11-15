@@ -4,6 +4,7 @@ import { Firestore, type DocumentReference } from "@google-cloud/firestore";
 import type {
   ActivityEntry,
   Appointment,
+  BriefDraft,
   Circle,
   DoseLog,
   FollowUp,
@@ -23,7 +24,8 @@ type Sub =
   | "activity"
   | "notifications"
   | "followUps"
-  | "proposals";
+  | "proposals"
+  | "briefs";
 
 const ALREADY_EXISTS = 6;
 const isAlreadyExists = (err: unknown) => (err as { code?: number }).code === ALREADY_EXISTS;
@@ -274,6 +276,14 @@ export class FirestoreRepository implements Repository {
       tx.update(ref, { status, decidedAt });
       return p;
     });
+  }
+
+  getBriefDraft(code: string, appointmentId: string) {
+    return this.getDoc<BriefDraft>(this.sub(code, "briefs").doc(appointmentId));
+  }
+
+  async putBriefDraft(code: string, draft: BriefDraft) {
+    await this.sub(code, "briefs").doc(draft.appointmentId).set(draft);
   }
 
   hitRateLimit(key: string, max: number, windowMs: number, now: Date) {

@@ -11,6 +11,7 @@ export const en = {
   "today.nothingScheduled": "Nothing scheduled today",
   "today.nextAppointment": "Next appointment",
   "today.noAppointment": "No appointments coming up",
+  "today.visitBrief": "Visit brief for the doctor",
   "today.readAloud": "Read today aloud",
   "today.stopReading": "Stop reading",
   "today.textSize": "Text size",

@@ -175,10 +175,16 @@ export default async function OverviewPage() {
                   {longDate(o.upcoming[0].at, zone)}, {clockLabel(o.upcoming[0].at, zone)}
                   {o.upcoming[0].location ? `, ${o.upcoming[0].location}` : ""}
                 </p>
-                <Link href="/appointments" className={linkCls}>
-                  All visits
-                  <ChevronRight aria-hidden="true" size={16} />
-                </Link>
+                <div className="flex flex-wrap gap-x-5">
+                  <Link href={`/appointments/${o.upcoming[0].id}/brief`} className={linkCls}>
+                    Visit brief
+                    <ChevronRight aria-hidden="true" size={16} />
+                  </Link>
+                  <Link href="/appointments" className={linkCls}>
+                    All visits
+                    <ChevronRight aria-hidden="true" size={16} />
+                  </Link>
+                </div>
               </>
             ) : (
               <p className="text-base text-muted">No visits coming up.</p>
