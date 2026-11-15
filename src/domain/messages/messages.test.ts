@@ -7,7 +7,7 @@ describe("t", () => {
   });
 
   it("fills numeric placeholders", () => {
-    expect(t("today.progress", { taken: 3, total: 4 })).toBe("3 of 4 taken today");
+    expect(t("today.progress", { taken: 3, total: 4 })).toBe("3 of 4 done today");
   });
 
   it("leaves a missing placeholder visible", () => {

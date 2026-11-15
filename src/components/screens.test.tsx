@@ -54,12 +54,12 @@ describe("public screens", () => {
 
   it("landing Today card fills a petal when a slot is taken", () => {
     render(<LiveTodayCard />);
-    expect(screen.getByText("1 of 4 taken today")).toBeInTheDocument();
+    expect(screen.getByText("1 of 4 done today")).toBeInTheDocument();
     for (let i = 0; i < 3; i += 1)
       fireEvent.click(screen.getByRole("button", { name: "I've taken these" }));
     expect(screen.getByText("All done for today")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Start the day again" }));
-    expect(screen.getByText("0 of 4 taken today")).toBeInTheDocument();
+    expect(screen.getByText("0 of 4 done today")).toBeInTheDocument();
   });
 });
 

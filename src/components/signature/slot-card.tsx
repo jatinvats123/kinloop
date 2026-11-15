@@ -82,7 +82,7 @@ export function SlotCard({
           const Icon = item.kind === "medicine" ? Pill : Activity;
           const itemSettled = item.status === "taken" || item.status === "skipped";
           return (
-            <li key={item.id} className="flex items-center gap-3">
+            <li key={item.id} className="flex flex-wrap items-center gap-3">
               <Icon aria-hidden="true" size={22} className="shrink-0" strokeWidth={2} />
               <div className="min-w-0 flex-1">
                 <p

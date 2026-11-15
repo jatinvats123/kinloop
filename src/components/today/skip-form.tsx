@@ -26,7 +26,7 @@ export function SkipForm({
   const [state, action] = useActionState<ActionResult, FormData>(skipAction, { ok: true });
   const base = `skip-${itemId}-${slotAt}`;
   return (
-    <details className="group">
+    <details className="group open:basis-full">
       <summary className="inline-flex min-h-11 cursor-pointer list-none items-center rounded-full px-3 text-base font-semibold text-olive underline decoration-2 underline-offset-4 [&::-webkit-details-marker]:hidden">
         {title}
         <span className="sr-only"> {itemName}</span>

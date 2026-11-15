@@ -41,6 +41,11 @@ function itemDetail(i: TodayGroup["items"][number]): { detail: string; note?: st
   return { detail };
 }
 
+function skippedText(g: TodayGroup): string {
+  const reason = g.items.find((i) => i.log?.reason)?.log?.reason;
+  return reason ? `${t("status.skipped")}: ${t(`skip.${reason}`)}` : t("status.skipped");
+}
+
 function itemName(i: TodayGroup["items"][number]): string {
   return i.item.kind === "medicine" && i.item.dose ? `${i.item.name} ${i.item.dose}` : i.item.name;
 }
@@ -150,7 +155,7 @@ export default async function TodayPage() {
                 settledText={
                   lastTaken
                     ? t("slot.takenAt", { time: clockLabel(lastTaken.loggedAt, circle.timezone) })
-                    : t("status.skipped")
+                    : skippedText(g)
                 }
                 items={items}
                 itemAction={

@@ -29,7 +29,7 @@ export function LiveTodayCard() {
           <DayBloom total={SLOTS.length} done={done} size="sm" />
         </div>
         <p className="mt-1 text-base text-muted" aria-live="polite">
-          {done === SLOTS.length ? "All done for today" : `${done} of ${SLOTS.length} taken today`}
+          {done === SLOTS.length ? "All done for today" : `${done} of ${SLOTS.length} done today`}
         </p>
         <ol className="mt-4 flex flex-col gap-2">
           {SLOTS.map((s, i) =>

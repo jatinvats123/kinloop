@@ -6,7 +6,7 @@ export const en = {
   "greeting.afternoon": "Good afternoon, {name}",
   "greeting.evening": "Good evening, {name}",
   "today.title": "Today",
-  "today.progress": "{taken} of {total} taken today",
+  "today.progress": "{taken} of {total} done today",
   "today.allDone": "All done for today",
   "today.nothingScheduled": "Nothing scheduled today",
   "today.nextAppointment": "Next appointment",
