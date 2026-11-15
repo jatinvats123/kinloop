@@ -61,7 +61,6 @@ export function LabelCheck({
   const outcome = useRef<HTMLDivElement>(null);
   const busy = pending || preparing;
 
-
   async function send(file: Blob) {
     setPreparing(true);
     setShown(true);
