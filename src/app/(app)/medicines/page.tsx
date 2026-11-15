@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Activity, Pause, Pill, Play, Plus } from "lucide-react";
 import { toggleItemAction } from "@/app/actions/care";
 import { PageHeader, SavedNotice } from "@/components/common/page-header";
+import { Sparkle } from "@/components/signature/sparkle";
 import { buttonClass } from "@/components/ui/button";
 import { can } from "@/domain/permissions";
 import { to12h } from "@/domain/time";
@@ -39,15 +40,23 @@ export default async function MedicinesPage({
         title="Medicines and routines"
         intro={
           canEdit
-            ? "Everything on the schedule. Changes show on Today straight away."
+            ? ctx.circle.approvalRequired && ctx.member.role !== "elder"
+              ? `Everything on the schedule. Ask me first is on, so your changes wait for ${ctx.circle.elderName.split(" ")[0]} to approve them.`
+              : "Everything on the schedule. Changes show on Today straight away."
             : "You can view the schedule. Ask an organiser for edit access to change it."
         }
         action={
           canEdit ? (
-            <Link href="/medicines/new" className={buttonClass("primary", "lg")}>
-              <Plus aria-hidden="true" size={20} />
-              Add
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/medicines/import" className={buttonClass("lime", "lg")}>
+                <Sparkle size={18} />
+                Import a prescription
+              </Link>
+              <Link href="/medicines/new" className={buttonClass("primary", "lg")}>
+                <Plus aria-hidden="true" size={20} />
+                Add
+              </Link>
+            </div>
           ) : undefined
         }
       />

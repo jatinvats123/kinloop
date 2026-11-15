@@ -7,6 +7,7 @@ import { VerdictPanel, type VerdictTone } from "@/components/signature/verdict-p
 import { TakeSlotForm } from "@/components/today/take-slot-form";
 import { buttonClass } from "@/components/ui/button";
 import type { LabelVerdict } from "@/domain/label-match";
+import { shrinkImage as shrink } from "./shrink-image";
 import type { ActionResult } from "@/server/errors";
 import type { LabelCheckResult } from "@/server/services/label-check";
 
@@ -37,26 +38,6 @@ const TONE: Record<LabelVerdict, VerdictTone> = {
   "not-on-list": "stop",
   unreadable: "neutral",
 };
-
-const MAX_EDGE = 1600;
-
-/** Downscales a photo to at most 1600 px on its long edge as JPEG, so uploads stay small and fast. */
-async function shrink(file: Blob): Promise<Blob> {
-  try {
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
-    if (scale === 1 && file.size < 1_500_000) return file;
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(bitmap.width * scale);
-    canvas.height = Math.round(bitmap.height * scale);
-    canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    return await new Promise<Blob>((resolve) =>
-      canvas.toBlob((b) => resolve(b ?? file), "image/jpeg", 0.85),
-    );
-  } catch {
-    return file;
-  }
-}
 
 export function LabelCheck({
   checkAction,
