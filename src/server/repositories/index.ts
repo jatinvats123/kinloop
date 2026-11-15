@@ -2,13 +2,13 @@
 import "server-only";
 import { env } from "@/server/env";
 import { MemoryRepository } from "./memory-repository";
+import { singletons } from "@/server/singletons";
 import type { Repository } from "./repository";
-
-const holder = globalThis as unknown as { __kinloopRepo?: Repository };
 
 /** The process-wide repository (Firestore in production, in-memory for tests and local runs). */
 export async function getRepository(): Promise<Repository> {
-  if (holder.__kinloopRepo) return holder.__kinloopRepo;
+  const holder = singletons();
+  if (holder.repository) return holder.repository;
   const { DATA_BACKEND, FIREBASE_SERVICE_ACCOUNT } = env();
   if (DATA_BACKEND === "firestore") {
     if (!FIREBASE_SERVICE_ACCOUNT)
@@ -17,16 +17,16 @@ export async function getRepository(): Promise<Repository> {
       import("@google-cloud/firestore"),
       import("./firestore-repository"),
     ]);
-    holder.__kinloopRepo = new FirestoreRepository(
+    holder.repository = new FirestoreRepository(
       new Firestore(firestoreSettings(FIREBASE_SERVICE_ACCOUNT)),
     );
   } else {
-    holder.__kinloopRepo = new MemoryRepository();
+    holder.repository = new MemoryRepository();
   }
-  return holder.__kinloopRepo;
+  return holder.repository;
 }
 
 /** Test hook: replaces the process-wide repository. */
 export function setRepositoryForTests(repo: Repository): void {
-  holder.__kinloopRepo = repo;
+  singletons().repository = repo;
 }

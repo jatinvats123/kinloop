@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Circle, Item, Member } from "@/domain/types";
 import { AppError } from "@/server/errors";
+import { present } from "@/test/fixtures";
 import { MemoryRepository } from "@/server/repositories/memory-repository";
 import { createCircle } from "./circles";
 import type { Ctx } from "./context";
@@ -137,11 +138,11 @@ describe("with Ask me first on", () => {
     await decideProposal(kamla, edit.id, "approved");
     expect(await repo.getItem(code, item.id)).toMatchObject({ dose: "1000 mg", times: ["09:00"] });
 
-    const pause = (await setItemActive(priya, item.id, false))!;
+    const pause = present(await setItemActive(priya, item.id, false), "pause proposal");
     await decideProposal(kamla, pause.id, "approved");
     expect((await repo.getItem(code, item.id))?.active).toBe(false);
 
-    const remove = (await deleteItem(priya, item.id))!;
+    const remove = present(await deleteItem(priya, item.id), "remove proposal");
     await decideProposal(kamla, remove.id, "approved");
     expect(await repo.getItem(code, item.id)).toBeNull();
     expect(await pendingIds()).toEqual([]);
@@ -198,7 +199,7 @@ describe("demo seed", () => {
     const [p] = await repo.listProposals(demo.code, "pending", 5);
     expect(p).toMatchObject({ kind: "add", proposedByName: "Priya" });
     code = demo.code;
-    await decideProposal(await ctxFor("Kamla Devi"), p!.id, "approved");
+    await decideProposal(await ctxFor("Kamla Devi"), present(p, "proposal").id, "approved");
     expect((await repo.listItems(demo.code)).some((i) => i.name === "Vitamin D3")).toBe(true);
   });
 });

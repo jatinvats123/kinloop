@@ -219,7 +219,6 @@ export function matchLabel(
     .filter((i) => i.active && i.kind === "medicine")
     .map((item) => ({ item, s: score(label, item) }))
     .filter((r) => r.s > 0);
-  if (ranked.length === 0) return none("not-on-list", label);
 
   const today = todayIn(zone, now);
   const t = now.getTime();
@@ -241,7 +240,9 @@ export function matchLabel(
   ranked.sort(
     (a, b) => b.s - a.s || Number(Boolean(dueSlot(b.item))) - Number(Boolean(dueSlot(a.item))),
   );
-  const item = ranked[0]!.item;
+  const top = ranked[0];
+  if (!top) return none("not-on-list", label);
+  const item = top.item;
   const labelStrength = labelStrengthText(label);
   const base = { item, labelStrength, listStrength: item.dose };
 

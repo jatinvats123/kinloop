@@ -6,6 +6,7 @@ import type { z } from "zod";
 import { env } from "@/server/env";
 import { AppError } from "@/server/errors";
 import { logger } from "@/server/logger";
+import { singletons } from "@/server/singletons";
 
 export interface AiImage {
   mimeType: "image/png" | "image/jpeg" | "image/webp";
@@ -134,17 +135,16 @@ function gemini(apiKey: string, model: string): AiClient {
   };
 }
 
-const holder = globalThis as unknown as { __kinloopAi?: AiClient | null };
-
 /** The process-wide AI client, or null when no API key is configured (AI features then fall back). */
 export function getAiClient(): AiClient | null {
-  if (holder.__kinloopAi !== undefined) return holder.__kinloopAi;
+  const holder = singletons();
+  if (holder.ai !== undefined) return holder.ai;
   const { GEMINI_API_KEY, GEMINI_MODEL } = env();
-  holder.__kinloopAi = GEMINI_API_KEY ? gemini(GEMINI_API_KEY, GEMINI_MODEL) : null;
-  return holder.__kinloopAi;
+  holder.ai = GEMINI_API_KEY ? gemini(GEMINI_API_KEY, GEMINI_MODEL) : null;
+  return holder.ai;
 }
 
 /** Test hook: replaces the process-wide AI client (null simulates a missing key). */
 export function setAiClientForTests(client: AiClient | null | undefined): void {
-  holder.__kinloopAi = client;
+  singletons().ai = client;
 }

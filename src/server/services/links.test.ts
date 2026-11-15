@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { makeCircle, makeItem, makeLog, makeMember } from "@/test/fixtures";
+import { makeCircle, makeItem, makeLog, makeMember, present } from "@/test/fixtures";
 import { AppError } from "@/server/errors";
 import { MemoryRepository } from "@/server/repositories/memory-repository";
 import { signLink } from "@/server/security/signed-link";
@@ -132,7 +132,7 @@ describe("I'll check on them", () => {
 
   it("shows who is handling a missed slot on Today and the overview", async () => {
     await followUpFromLink(repo, followToken("m-priya"), SECRET, at(65));
-    const circle = (await repo.getCircle(CODE))!;
+    const circle = present(await repo.getCircle(CODE), "circle");
     const today = await buildToday(repo, circle, at(70));
     expect(today.groups.find((g) => g.at === SLOT)?.followUp?.memberName).toBe("Priya");
     const overview = await buildOverview(repo, circle, at(70));

@@ -69,3 +69,9 @@ export function makeCircle(over: Partial<Circle> = {}): Circle {
     ...over,
   };
 }
+
+/** Narrows a value a test expects to exist, failing the test with a clear message otherwise. */
+export function present<T>(value: T | null | undefined, what = "value"): T {
+  if (value === null || value === undefined) throw new Error(`Expected ${what} to be present`);
+  return value;
+}

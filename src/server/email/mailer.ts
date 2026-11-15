@@ -2,6 +2,7 @@
 // in-memory outbox for tests and local runs without SMTP settings.
 import "server-only";
 import { env } from "@/server/env";
+import { singletons } from "@/server/singletons";
 
 export interface MailMessage {
   to: string;
@@ -46,8 +47,6 @@ async function gmailMailer(user: string, pass: string, from: string): Promise<Ma
   };
 }
 
-const holder = globalThis as unknown as { __kinloopMailer?: Mailer };
-
 /** True when SMTP credentials are configured, so real email can be sent. */
 export function mailConfigured(): boolean {
   const { SMTP_USER, SMTP_PASS } = env();
@@ -56,16 +55,17 @@ export function mailConfigured(): boolean {
 
 /** The process-wide mailer: Gmail SMTP when configured, otherwise an in-memory outbox. */
 export async function getMailer(): Promise<Mailer> {
-  if (holder.__kinloopMailer) return holder.__kinloopMailer;
+  const holder = singletons();
+  if (holder.mailer) return holder.mailer;
   const { SMTP_USER, SMTP_PASS, MAIL_FROM } = env();
-  holder.__kinloopMailer =
+  holder.mailer =
     SMTP_USER && SMTP_PASS
       ? await gmailMailer(SMTP_USER, SMTP_PASS, MAIL_FROM || `Kinloop <${SMTP_USER}>`)
       : new MemoryMailer();
-  return holder.__kinloopMailer;
+  return holder.mailer;
 }
 
 /** Test hook: replaces the process-wide mailer. */
 export function setMailerForTests(mailer: Mailer): void {
-  holder.__kinloopMailer = mailer;
+  singletons().mailer = mailer;
 }
