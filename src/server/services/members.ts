@@ -19,6 +19,14 @@ async function loadMember(ctx: Ctx, id: string): Promise<Member> {
   return m;
 }
 
+/** Demo circles only: keep the demo panel's sign-in details current. Real circles never store passcodes. */
+async function rememberDemoPasscode(ctx: Ctx, memberId: string, passcode: string): Promise<void> {
+  if (!ctx.circle.isDemo || !ctx.circle.demoAccess) return;
+  await ctx.repo.updateCircle(ctx.circle.code, {
+    demoAccess: { ...ctx.circle.demoAccess, [memberId]: passcode },
+  });
+}
+
 /** Adds a family member or caretaker; returns their passcode, shown once. */
 export async function addMember(
   ctx: Ctx,
@@ -41,6 +49,7 @@ export async function addMember(
     ctx.now,
   );
   await ctx.repo.putMember(ctx.circle.code, created.member);
+  await rememberDemoPasscode(ctx, created.member.id, created.passcode);
   await recordActivity(ctx, "member.added", `Added ${d.name} as ${d.role} with ${d.access} access`);
   return created;
 }
@@ -102,6 +111,7 @@ export async function regeneratePasscode(
   const passcode = newPasscode();
   const { hash, salt } = await hashPasscode(passcode);
   await ctx.repo.putMember(ctx.circle.code, { ...target, passcodeHash: hash, salt });
+  await rememberDemoPasscode(ctx, target.id, passcode);
   await recordActivity(ctx, "passcode.regenerated", `Issued a new passcode for ${target.name}`);
   return { name: target.name, passcode };
 }

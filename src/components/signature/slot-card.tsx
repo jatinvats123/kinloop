@@ -59,6 +59,7 @@ export function SlotCard({
           </H>
           <p className="truncate text-sm text-muted">{items.map((i) => i.name).join(", ")}</p>
         </div>
+        {action}
       </li>
     );
   }
