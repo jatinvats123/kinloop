@@ -2,7 +2,7 @@
 // the health profile, the next visit and recent activity.
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlertTriangle, CalendarDays, ChevronRight } from "lucide-react";
+import { AlertTriangle, CalendarDays, ChevronRight, HeartHandshake } from "lucide-react";
 import { DayBloom } from "@/components/signature/day-bloom";
 import { ThinCurve } from "@/components/signature/data-marks";
 import { StatusLabel } from "@/components/signature/status-label";
@@ -65,6 +65,12 @@ export default async function OverviewPage() {
                     <p className="truncate text-sm text-muted">
                       {g.items.map((i) => i.item.name).join(", ")}
                     </p>
+                    {g.followUp ? (
+                      <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-lime-soft px-3 py-1 text-sm font-semibold">
+                        <HeartHandshake aria-hidden="true" size={16} />
+                        {g.followUp.memberName} is checking
+                      </p>
+                    ) : null}
                   </div>
                   <StatusLabel status={g.status} />
                 </li>

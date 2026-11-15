@@ -4,6 +4,7 @@ import { AppError } from "@/server/errors";
 import { MemoryRepository } from "@/server/repositories/memory-repository";
 import { signLink } from "@/server/security/signed-link";
 import { confirmFromLink, followUpFromLink, readSlotLink } from "./links";
+import { buildOverview, buildToday } from "./read-models";
 
 const SECRET = "test-link-secret-0123456789abcdef";
 const SLOT = "2026-11-15T02:30:00.000Z"; // 08:00 IST
@@ -127,6 +128,16 @@ describe("I'll check on them", () => {
     expect(again.mine).toBe(true);
     const activity = await repo.listActivity(CODE, 10);
     expect(activity.filter((e) => e.action === "follow-up.claimed")).toHaveLength(1);
+  });
+
+  it("shows who is handling a missed slot on Today and the overview", async () => {
+    await followUpFromLink(repo, followToken("m-priya"), SECRET, at(65));
+    const circle = (await repo.getCircle(CODE))!;
+    const today = await buildToday(repo, circle, at(70));
+    expect(today.groups.find((g) => g.at === SLOT)?.followUp?.memberName).toBe("Priya");
+    const overview = await buildOverview(repo, circle, at(70));
+    expect(overview.today.groups.find((g) => g.at === SLOT)?.followUp?.memberName).toBe("Priya");
+    expect(overview.today.groups.find((g) => g.at !== SLOT)?.followUp).toBeNull();
   });
 
   it("shows who is handling it on GET", async () => {

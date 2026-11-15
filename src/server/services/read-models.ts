@@ -9,6 +9,7 @@ import type {
   Appointment,
   Circle,
   DoseLog,
+  FollowUp,
   Item,
   SlotStatus,
   WeekDay,
@@ -27,6 +28,8 @@ export interface TodayGroup {
   at: string;
   status: SlotStatus;
   items: TodayItem[];
+  /** "I'll check on them": the circle member handling this slot, if anyone is. */
+  followUp: FollowUp | null;
 }
 
 export interface TodayView {
@@ -50,8 +53,10 @@ function buildGroups(
   date: string,
   circle: Circle,
   now: Date,
+  followUps: FollowUp[] = [],
 ): TodayGroup[] {
   const byKey = indexLogs(logs);
+  const handling = new Map(followUps.map((f) => [f.slotAt, f]));
   const itemsById = new Map(items.map((i) => [i.id, i]));
   return groupByTime(slotsForRange(items, date, date, circle.timezone)).map((g) => {
     const groupItems = g.slots.map((s) => {
@@ -63,6 +68,7 @@ function buildGroups(
       at: g.at,
       items: groupItems,
       status: groupStatus(groupItems.map((i) => i.status)),
+      followUp: handling.get(g.at) ?? null,
     };
   });
 }
@@ -71,12 +77,13 @@ function buildGroups(
 export async function buildToday(repo: Repository, circle: Circle, now: Date): Promise<TodayView> {
   const date = todayIn(circle.timezone, now);
   const { from, to } = dayBoundsUtc(date, circle.timezone);
-  const [items, logs, appts] = await Promise.all([
+  const [items, logs, appts, followUps] = await Promise.all([
     repo.listItems(circle.code),
     repo.listLogs(circle.code, from, to),
     repo.listAppointments(circle.code, now.toISOString(), 1),
+    repo.listFollowUps(circle.code, from),
   ]);
-  const groups = buildGroups(items, logs, date, circle, now);
+  const groups = buildGroups(items, logs, date, circle, now, followUps);
   const all = groups.flatMap((g) => g.items);
   return {
     date,
@@ -113,14 +120,15 @@ export async function buildOverview(
   const date = todayIn(zone, now);
   const from = dayBoundsUtc(addDays(date, -29), zone).from;
   const { from: todayFrom, to } = dayBoundsUtc(date, zone);
-  const [items, logs, upcoming, activity] = await Promise.all([
+  const [items, logs, upcoming, activity, followUps] = await Promise.all([
     repo.listItems(circle.code),
     repo.listLogs(circle.code, from, to),
     repo.listAppointments(circle.code, now.toISOString(), 5),
     repo.listActivity(circle.code, 12),
+    repo.listFollowUps(circle.code, todayFrom),
   ]);
   const todayLogs = logs.filter((l) => l.scheduledAt >= todayFrom);
-  const groups = buildGroups(items, todayLogs, date, circle, now);
+  const groups = buildGroups(items, todayLogs, date, circle, now, followUps);
   const all = groups.flatMap((g) => g.items);
   const today: TodayView = {
     date,

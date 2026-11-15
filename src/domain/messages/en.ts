@@ -60,6 +60,7 @@ export const en = {
   "confirm.expired": "This link has expired. Open Kinloop to mark your medicines.",
   "confirm.invalid": "This link isn't valid. Open Kinloop to mark your medicines.",
   "confirm.alreadyDone": "These are already marked. Nothing more to do.",
+  "followUp.handling": "{name} is checking in about the {time} medicines.",
   "proposal.title": "Changes waiting for you",
   "proposal.waitingTitle": "Waiting for {name}'s approval",
   "proposal.from": "{name} suggests:",

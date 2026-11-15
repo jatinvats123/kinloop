@@ -3,7 +3,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { CalendarDays, ScanLine } from "lucide-react";
+import { CalendarDays, HeartHandshake, ScanLine } from "lucide-react";
 import { setTextSizeAction } from "@/app/actions/prefs";
 import {
   decideProposalAction,
@@ -137,6 +137,22 @@ export default async function TodayPage() {
         elderFirstName={firstName}
         action={decideProposalAction}
       />
+
+      {view.groups
+        .filter((g) => g.followUp && g.status === "missed")
+        .map((g) => (
+          <p
+            key={`fu-${g.at}`}
+            role="status"
+            className="flex items-center gap-3 rounded-card bg-lime-soft p-5 text-lg font-semibold"
+          >
+            <HeartHandshake aria-hidden="true" size={24} className="shrink-0" />
+            {t("followUp.handling", {
+              name: g.followUp?.memberName ?? "",
+              time: to12h(g.time).label,
+            })}
+          </p>
+        ))}
 
       {view.groups.length === 0 ? (
         <Card>
