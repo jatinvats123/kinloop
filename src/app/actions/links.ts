@@ -8,6 +8,11 @@ import { AppError, toActionError, type ActionResult } from "@/server/errors";
 import { getRepository } from "@/server/repositories";
 import { confirmFromLink, followUpFromLink } from "@/server/services/links";
 
+/** Refreshes the signed-in views, but not the link page itself, so its thank-you message stays. */
+function refreshCircleViews(): void {
+  for (const path of ["/today", "/overview", "/activity", "/reminders"]) revalidatePath(path);
+}
+
 const token = (fd: FormData) => String(fd.get("t") ?? "").slice(0, 700);
 
 function linkError(err: unknown): ActionResult {
@@ -28,7 +33,7 @@ export async function confirmLinkAction(_prev: ActionResult, fd: FormData): Prom
       env().LINK_SECRET,
       new Date(),
     );
-    revalidatePath("/", "layout");
+    refreshCircleViews();
     return { ok: true, message: marked > 0 ? t("confirm.done") : t("confirm.alreadyDone") };
   } catch (err) {
     return linkError(err);
@@ -43,7 +48,7 @@ export async function followUpLinkAction(_prev: ActionResult, fd: FormData): Pro
       env().LINK_SECRET,
       new Date(),
     );
-    revalidatePath("/", "layout");
+    refreshCircleViews();
     return {
       ok: true,
       message: mine
