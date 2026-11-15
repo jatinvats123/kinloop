@@ -186,15 +186,16 @@ Vercel (Hobby) + Firestore on the free Firebase Spark plan, with a GitHub Action
 `POST /api/cron/tick` every five minutes using a shared secret (`.github/workflows/cron.yml`). The
 container is Cloud Run-ready. Step-by-step: [docs/DEPLOY.md](docs/DEPLOY.md).
 
-## Known limits
+## Challenges and how we handled them
 
-- Member email addresses are not verified; reminders go only to addresses members enter themselves.
-- Label reading depends on photo quality; an unclear photo gives "Couldn't read it", never a guess.
-- GitHub's scheduled workflows can run late or be skipped, so reminders can be delayed. The engine is
-  window-based and idempotent, so a late tick still sends each due email once (and skips slots older
-  than six hours).
-- English only for now; elder-facing strings already go through one message dictionary
-  (`src/domain/messages/`).
+| Challenge                                                                                                   | What we did                                                                                                                                                                                                                          | Where                                                                                   |
+| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| No Google Cloud billing on the account, so Cloud Run, Cloud Scheduler and Secret Manager were not available | Hosted on Vercel with Firestore on the free Firebase Spark plan and secrets in environment variables; kept a multi-stage, non-root `Dockerfile` and `/api/health` so the same app moves to Cloud Run unchanged                       | `Dockerfile`, `docs/DEPLOY.md`                                                          |
+| GitHub's scheduled workflows can run late or be skipped, which could delay or repeat reminders              | Made the reminder engine window-based and idempotent: each email is claimed before it is sent, a late tick still sends each due email exactly once, slots older than six hours are skipped, and the workflow can also be run by hand | `src/domain/reminders.ts`, `src/server/reminders/tick.ts`, `.github/workflows/cron.yml` |
+| A blurry or partial photo could make the AI misread a medicine label                                        | The AI only reads; tested code decides. Low-confidence or unreadable labels get "Couldn't read it. Try again in better light.", never a guess, and the answer always says "matches your schedule", never "safe to take"              | `src/domain/label-match.ts`                                                             |
+| The first Gemini model took 12–16 s from Vercel and hit rate limits                                         | Switched to a faster Flash-Lite model with minimal thinking (about 2 s per label), with a 20 s timeout, one retry and a calm fallback message                                                                                        | `src/server/ai/client.ts`                                                               |
+| Member email addresses are not verified, so a wrong address could receive reminders                         | Emails go only to addresses members enter for themselves, use fixed templates with escaped content, and are capped per circle per day; test emails are rate-limited per member and per IP                                            | `src/server/email/`, `src/server/services/reminders.ts`                                 |
+| Elders may prefer a language other than English                                                             | Every elder-facing string goes through one typed message dictionary, so adding Hindi needs no screen changes                                                                                                                         | `src/domain/messages/`                                                                  |
 
 ## Next steps
 
