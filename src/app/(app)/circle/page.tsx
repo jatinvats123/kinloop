@@ -42,6 +42,16 @@ export default async function CirclePage({
       <PageHeader
         title={`${circle.elderName}'s circle`}
         intro={`Circle code ${formatCircleCode(circle.code)}. Each person signs in with this code and their own passcode.`}
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/reminders" className={buttonClass("secondary")}>
+              Email reminders
+            </Link>
+            <Link href="/activity" className={buttonClass("secondary")}>
+              Activity
+            </Link>
+          </div>
+        }
       />
       <SavedNotice show={(await searchParams).saved === "1"} />
       <div className="grid gap-6 lg:grid-cols-2">

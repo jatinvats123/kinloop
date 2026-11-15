@@ -179,6 +179,23 @@ export default async function OverviewPage() {
             )}
           </Card>
 
+          <Card aria-labelledby="rem-h">
+            <CardHeader
+              id="rem-h"
+              title="Email reminders"
+              action={
+                <Link href="/reminders" className={linkCls}>
+                  Reminders log
+                  <ChevronRight aria-hidden="true" size={16} />
+                </Link>
+              }
+            />
+            <p className="text-base">
+              {firstName} is reminded first. If a dose is still not marked an hour later, members
+              who asked are emailed, and the first to answer is shown here as checking.
+            </p>
+          </Card>
+
           <Card aria-labelledby="prof-h">
             <CardHeader
               id="prof-h"
