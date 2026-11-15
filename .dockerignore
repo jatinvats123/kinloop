@@ -1,0 +1,13 @@
+node_modules
+.next
+coverage
+.git
+.github
+.env*
+!.env.example
+CLAUDE.md
+AGENTS.md
+prompts
+.claude
+infra
+*.md

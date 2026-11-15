@@ -1,0 +1,29 @@
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# env files (only the documented example is committed)
+.env*
+!.env.example
+
+# local tooling and private notes
+CLAUDE.md
+AGENTS.md
+prompts/
+.claude/
+.vscode/
+.idea/
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
