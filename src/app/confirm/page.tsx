@@ -58,18 +58,13 @@ export default async function ConfirmPage({
           </li>
         ))}
       </ul>
-      {open.length > 0 ? (
-        <LinkActionForm
-          action={confirmLinkAction}
-          token={token}
-          label={t("confirm.button")}
-          pendingText={t("confirm.saving")}
-        />
-      ) : (
-        <p role="status" className="rounded-3xl bg-lime p-5 text-xl font-semibold text-ink">
-          {t("confirm.alreadyDone")}
-        </p>
-      )}
+      <LinkActionForm
+        action={confirmLinkAction}
+        token={token}
+        label={t("confirm.button")}
+        pendingText={t("confirm.saving")}
+        doneText={open.length === 0 ? t("confirm.alreadyDone") : undefined}
+      />
     </PublicFrame>
   );
 }
