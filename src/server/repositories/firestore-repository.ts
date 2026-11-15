@@ -1,10 +1,32 @@
 // Firestore (Native mode) repository. Server-side only; authenticated with a service-account key
 // from FIREBASE_SERVICE_ACCOUNT (base64 JSON). Queries are bounded and use single-field indexes only.
 import { Firestore, type DocumentReference } from "@google-cloud/firestore";
-import type { ActivityEntry, Appointment, Circle, DoseLog, Item, Member } from "@/domain/types";
+import type {
+  ActivityEntry,
+  Appointment,
+  Circle,
+  DoseLog,
+  FollowUp,
+  Item,
+  Member,
+  Notification,
+  Proposal,
+  ProposalStatus,
+} from "@/domain/types";
 import type { CircleSeed, Repository } from "./repository";
 
-type Sub = "members" | "items" | "logs" | "appointments" | "activity";
+type Sub =
+  | "members"
+  | "items"
+  | "logs"
+  | "appointments"
+  | "activity"
+  | "notifications"
+  | "followUps"
+  | "proposals";
+
+const ALREADY_EXISTS = 6;
+const isAlreadyExists = (err: unknown) => (err as { code?: number }).code === ALREADY_EXISTS;
 
 /** Decodes the base64 service-account JSON into Firestore client settings. */
 export function firestoreSettings(serviceAccountB64: string) {
@@ -41,7 +63,7 @@ export class FirestoreRepository implements Repository {
     try {
       await this.circleRef(code).create(seed.circle);
     } catch (err) {
-      if ((err as { code?: number }).code === 6) return false; // ALREADY_EXISTS
+      if (isAlreadyExists(err)) return false;
       throw err;
     }
     const writer = this.db.bulkWriter();
@@ -53,6 +75,7 @@ export class FirestoreRepository implements Repository {
     put("logs", seed.logs);
     put("appointments", seed.appointments);
     put("activity", seed.activity);
+    put("proposals", seed.proposals);
     await writer.close();
     return true;
   }
@@ -87,6 +110,16 @@ export class FirestoreRepository implements Repository {
       .limit(limit)
       .get();
     return snap.docs.filter((d) => (d.data() as Circle).isDemo).map((d) => d.id);
+  }
+
+  async listMailEnabledCircles(limit: number) {
+    const snap = await this.db
+      .collection("circles")
+      .where("mailEnabled", "==", true)
+      .limit(limit)
+      .select()
+      .get();
+    return snap.docs.map((d) => d.id);
   }
 
   async listMembers(code: string) {
@@ -170,6 +203,77 @@ export class FirestoreRepository implements Repository {
   async listActivity(code: string, limit: number) {
     const snap = await this.sub(code, "activity").orderBy("at", "desc").limit(limit).get();
     return snap.docs.map((d) => d.data() as ActivityEntry);
+  }
+
+  async claimNotification(code: string, n: Notification) {
+    try {
+      await this.sub(code, "notifications").doc(n.id).create(n);
+      return true;
+    } catch (err) {
+      if (isAlreadyExists(err)) return false;
+      throw err;
+    }
+  }
+
+  async releaseNotification(code: string, id: string) {
+    await this.sub(code, "notifications").doc(id).delete();
+  }
+
+  async listNotifications(code: string, sinceIso: string, limit: number) {
+    const snap = await this.sub(code, "notifications")
+      .where("sentAt", ">=", sinceIso)
+      .orderBy("sentAt", "desc")
+      .limit(limit)
+      .get();
+    return snap.docs.map((d) => d.data() as Notification);
+  }
+
+  async claimFollowUp(code: string, f: FollowUp) {
+    const ref = this.sub(code, "followUps").doc(f.slotAt);
+    try {
+      await ref.create(f);
+      return f;
+    } catch (err) {
+      if (!isAlreadyExists(err)) throw err;
+      return (await this.getDoc<FollowUp>(ref)) ?? f;
+    }
+  }
+
+  async listFollowUps(code: string, sinceIso: string) {
+    const snap = await this.sub(code, "followUps").where("slotAt", ">=", sinceIso).limit(100).get();
+    return snap.docs.map((d) => d.data() as FollowUp);
+  }
+
+  async putProposal(code: string, p: Proposal) {
+    await this.sub(code, "proposals").doc(p.id).set(p);
+  }
+
+  getProposal(code: string, id: string) {
+    return this.getDoc<Proposal>(this.sub(code, "proposals").doc(id));
+  }
+
+  async listProposals(code: string, status: ProposalStatus, limit: number) {
+    // Equality filter only (no composite index needed); sorted here and bounded by `limit`.
+    const snap = await this.sub(code, "proposals").where("status", "==", status).limit(limit).get();
+    return snap.docs
+      .map((d) => d.data() as Proposal)
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  }
+
+  decideProposal(
+    code: string,
+    id: string,
+    status: Exclude<ProposalStatus, "pending">,
+    decidedAt: string,
+  ) {
+    const ref = this.sub(code, "proposals").doc(id);
+    return this.db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      const p = snap.data() as Proposal | undefined;
+      if (!p || p.status !== "pending") return null;
+      tx.update(ref, { status, decidedAt });
+      return p;
+    });
   }
 
   hitRateLimit(key: string, max: number, windowMs: number, now: Date) {

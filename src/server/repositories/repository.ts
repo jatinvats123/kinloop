@@ -1,6 +1,17 @@
 // Repository contract: every read and write is scoped to one circle code. Implemented by the
 // Firestore repository (production) and the in-memory repository (tests and local runs).
-import type { ActivityEntry, Appointment, Circle, DoseLog, Item, Member } from "@/domain/types";
+import type {
+  ActivityEntry,
+  Appointment,
+  Circle,
+  DoseLog,
+  FollowUp,
+  Item,
+  Member,
+  Notification,
+  Proposal,
+  ProposalStatus,
+} from "@/domain/types";
 
 export interface CircleSeed {
   circle: Circle;
@@ -9,6 +20,7 @@ export interface CircleSeed {
   logs?: DoseLog[];
   appointments?: Appointment[];
   activity?: ActivityEntry[];
+  proposals?: Proposal[];
 }
 
 export interface Repository {
@@ -28,6 +40,9 @@ export interface Repository {
   deleteCircle(code: string): Promise<void>;
   /** Codes of demo circles whose expiry is before `nowIso`, at most `limit`. */
   listExpiredDemoCircles(nowIso: string, limit: number): Promise<string[]>;
+
+  /** Codes of circles where at least one member has an email (the cron tick's work list). */
+  listMailEnabledCircles(limit: number): Promise<string[]>;
 
   listMembers(code: string): Promise<Member[]>;
   getMember(code: string, id: string): Promise<Member | null>;
@@ -54,6 +69,36 @@ export interface Repository {
   addActivity(code: string, entry: ActivityEntry): Promise<void>;
   /** Most recent activity first, at most `limit`. */
   listActivity(code: string, limit: number): Promise<ActivityEntry[]>;
+
+  /** Creates the notification only if its ID is new; returns false when it was already claimed. */
+  claimNotification(code: string, notification: Notification): Promise<boolean>;
+  /** Releases a claim so a failed send can be retried on the next tick. */
+  releaseNotification(code: string, id: string): Promise<void>;
+  /** Notifications sent at or after `sinceIso`, newest first, at most `limit`. */
+  listNotifications(code: string, sinceIso: string, limit: number): Promise<Notification[]>;
+
+  /**
+   * Records `followUp` for its slot unless someone already did; returns whichever follow-up holds
+   * the slot afterwards (the first responder wins).
+   */
+  claimFollowUp(code: string, followUp: FollowUp): Promise<FollowUp>;
+  /** Follow-ups for slots at or after `sinceIso`. */
+  listFollowUps(code: string, sinceIso: string): Promise<FollowUp[]>;
+
+  putProposal(code: string, proposal: Proposal): Promise<void>;
+  getProposal(code: string, id: string): Promise<Proposal | null>;
+  /** Proposals with `status`, newest first, at most `limit`. */
+  listProposals(code: string, status: ProposalStatus, limit: number): Promise<Proposal[]>;
+  /**
+   * Moves a pending proposal to `status` in one transaction; returns the proposal as it was if it
+   * was pending, or null when it was missing or already decided.
+   */
+  decideProposal(
+    code: string,
+    id: string,
+    status: Exclude<ProposalStatus, "pending">,
+    decidedAt: string,
+  ): Promise<Proposal | null>;
 
   /**
    * Fixed-window rate limit: records a hit for `key` and returns whether it is within `max` hits

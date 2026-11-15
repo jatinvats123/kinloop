@@ -1,5 +1,16 @@
 // In-memory repository for tests and local runs without cloud access. Not shared across processes.
-import type { ActivityEntry, Appointment, Circle, DoseLog, Item, Member } from "@/domain/types";
+import type {
+  ActivityEntry,
+  Appointment,
+  Circle,
+  DoseLog,
+  FollowUp,
+  Item,
+  Member,
+  Notification,
+  Proposal,
+  ProposalStatus,
+} from "@/domain/types";
 import type { CircleSeed, Repository } from "./repository";
 
 interface CircleData {
@@ -9,6 +20,9 @@ interface CircleData {
   logs: Map<string, DoseLog>;
   appointments: Map<string, Appointment>;
   activity: ActivityEntry[];
+  notifications: Map<string, Notification>;
+  followUps: Map<string, FollowUp>;
+  proposals: Map<string, Proposal>;
 }
 
 const clone = <T>(v: T): T => structuredClone(v);
@@ -32,6 +46,9 @@ export class MemoryRepository implements Repository {
       logs: byId(seed.logs),
       appointments: byId(seed.appointments),
       activity: clone(seed.activity ?? []),
+      notifications: new Map(),
+      followUps: new Map(),
+      proposals: byId(seed.proposals),
     });
     return true;
   }
@@ -62,6 +79,13 @@ export class MemoryRepository implements Repository {
   async listExpiredDemoCircles(nowIso: string, limit: number) {
     return [...this.circles.values()]
       .filter((d) => d.circle.isDemo && d.circle.expiresAt !== null && d.circle.expiresAt < nowIso)
+      .slice(0, limit)
+      .map((d) => d.circle.code);
+  }
+
+  async listMailEnabledCircles(limit: number) {
+    return [...this.circles.values()]
+      .filter((d) => d.circle.mailEnabled)
       .slice(0, limit)
       .map((d) => d.circle.code);
   }
@@ -145,6 +169,70 @@ export class MemoryRepository implements Repository {
       .sort((a, b) => (a.at < b.at ? 1 : -1))
       .slice(0, limit)
       .map(clone);
+  }
+
+  async claimNotification(code: string, n: Notification) {
+    const d = this.data(code);
+    if (!d || d.notifications.has(n.id)) return false;
+    d.notifications.set(n.id, clone(n));
+    return true;
+  }
+
+  async releaseNotification(code: string, id: string) {
+    this.data(code)?.notifications.delete(id);
+  }
+
+  async listNotifications(code: string, sinceIso: string, limit: number) {
+    return [...(this.data(code)?.notifications.values() ?? [])]
+      .filter((n) => n.sentAt >= sinceIso)
+      .sort((a, b) => (a.sentAt < b.sentAt ? 1 : -1))
+      .slice(0, limit)
+      .map(clone);
+  }
+
+  async claimFollowUp(code: string, f: FollowUp) {
+    const d = this.data(code);
+    const held = d?.followUps.get(f.slotAt);
+    if (held) return clone(held);
+    d?.followUps.set(f.slotAt, clone(f));
+    return clone(f);
+  }
+
+  async listFollowUps(code: string, sinceIso: string) {
+    return [...(this.data(code)?.followUps.values() ?? [])]
+      .filter((f) => f.slotAt >= sinceIso)
+      .map(clone);
+  }
+
+  async putProposal(code: string, p: Proposal) {
+    this.data(code)?.proposals.set(p.id, clone(p));
+  }
+
+  async getProposal(code: string, id: string) {
+    const p = this.data(code)?.proposals.get(id);
+    return p ? clone(p) : null;
+  }
+
+  async listProposals(code: string, status: ProposalStatus, limit: number) {
+    return [...(this.data(code)?.proposals.values() ?? [])]
+      .filter((p) => p.status === status)
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      .slice(0, limit)
+      .map(clone);
+  }
+
+  async decideProposal(
+    code: string,
+    id: string,
+    status: Exclude<ProposalStatus, "pending">,
+    decidedAt: string,
+  ) {
+    const p = this.data(code)?.proposals.get(id);
+    if (!p || p.status !== "pending") return null;
+    const before = clone(p);
+    p.status = status;
+    p.decidedAt = decidedAt;
+    return before;
   }
 
   async hitRateLimit(key: string, max: number, windowMs: number, now: Date) {

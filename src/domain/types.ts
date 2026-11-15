@@ -33,6 +33,8 @@ export interface Circle {
   profile: HealthProfile;
   login: { failures: number; lockedUntil: string | null };
   quota: { aiDay: string; aiCount: number; mailDay: string; mailCount: number };
+  /** True when any member has an email, so the cron tick only visits circles that can receive mail. */
+  mailEnabled?: boolean;
   /** Demo circles only: sign-in details shown on the demo panel (fictional people, no real data). */
   demoAccess?: Record<string, string>;
 }
@@ -111,4 +113,57 @@ export interface WeekDay {
   total: number;
   done: number;
   isToday: boolean;
+}
+
+/** What a sent (or claimed) reminder email was about: a ladder stage or a test message. */
+export type NotificationType =
+  "due" | "missed-elder" | "missed-circle" | "appt-24h" | "appt-2h" | "test";
+
+/** A reminder email that was claimed and sent; the ID makes each email go out at most once. */
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  to: string;
+  /** The slot or appointment instant the email is about. */
+  at: string;
+  sentAt: string;
+  itemCount: number;
+}
+
+/** "I'll check on her": the first member who took on a missed slot. */
+export interface FollowUp {
+  slotAt: string;
+  memberId: string;
+  memberName: string;
+  at: string;
+}
+
+export type ProposalKind = "add" | "update" | "remove";
+export type ProposalStatus = "pending" | "approved" | "declined";
+
+/** Schedule fields a proposal carries; the same shape the item form saves. */
+export interface ItemDraft {
+  kind: ItemKind;
+  name: string;
+  composition: string | null;
+  dose: string | null;
+  instructions: string;
+  times: string[];
+  daysOfWeek: number[];
+  startDate: string;
+  endDate: string | null;
+}
+
+/** "Ask me first": a schedule change by another member, waiting for the elder's decision. */
+export interface Proposal {
+  id: string;
+  kind: ProposalKind;
+  itemId: string | null;
+  payload: ItemDraft | null;
+  summary: string;
+  proposedBy: string;
+  proposedByName: string;
+  status: ProposalStatus;
+  createdAt: string;
+  decidedAt: string | null;
 }

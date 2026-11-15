@@ -27,6 +27,15 @@ async function rememberDemoPasscode(ctx: Ctx, memberId: string, passcode: string
   });
 }
 
+/** Keeps `circle.mailEnabled` in step with whether anyone has an email, so the cron tick visits it. */
+export async function syncMailFlag(ctx: Pick<Ctx, "repo" | "circle">): Promise<void> {
+  const members = await ctx.repo.listMembers(ctx.circle.code);
+  const mailEnabled = members.some((m) => Boolean(m.email));
+  if (Boolean(ctx.circle.mailEnabled) !== mailEnabled) {
+    await ctx.repo.updateCircle(ctx.circle.code, { mailEnabled });
+  }
+}
+
 /** Adds a family member or caretaker; returns their passcode, shown once. */
 export async function addMember(
   ctx: Ctx,
@@ -50,6 +59,7 @@ export async function addMember(
   );
   await ctx.repo.putMember(ctx.circle.code, created.member);
   await rememberDemoPasscode(ctx, created.member.id, created.passcode);
+  await syncMailFlag(ctx);
   await recordActivity(ctx, "member.added", `Added ${d.name} as ${d.role} with ${d.access} access`);
   return created;
 }
@@ -66,6 +76,7 @@ export async function updateMember(ctx: Ctx, memberId: string, input: unknown): 
       email: d.email,
       alerts: { missed: d.alertMissed, appointments: d.alertAppointments },
     });
+    await syncMailFlag(ctx);
     await recordActivity(ctx, "member.updated", "Updated their contact and alert choices");
     return;
   }
@@ -83,6 +94,7 @@ export async function updateMember(ctx: Ctx, memberId: string, input: unknown): 
     access: managing ? d.access : target.access,
     isOrganiser: managing ? d.isOrganiser : target.isOrganiser,
   });
+  await syncMailFlag(ctx);
   await recordActivity(ctx, "member.updated", `Updated ${d.name}'s details`);
 }
 
@@ -96,6 +108,7 @@ export async function removeMember(ctx: Ctx, memberId: string): Promise<void> {
   if (!canManageMember(ctx.member, target))
     throw new AppError("forbidden", "You don't have permission to do that.");
   await ctx.repo.deleteMember(ctx.circle.code, memberId);
+  await syncMailFlag(ctx);
   await recordActivity(ctx, "member.removed", `Removed ${target.name} from the circle`);
 }
 

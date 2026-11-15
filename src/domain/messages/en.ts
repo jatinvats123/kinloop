@@ -48,10 +48,30 @@ export const en = {
   "confirm.button": "Yes, I've taken them",
   "confirm.done": "Thank you. Your circle can see it's done.",
   "confirm.expired": "This link has expired. Open Kinloop to mark your medicines.",
+  "confirm.invalid": "This link isn't valid. Open Kinloop to mark your medicines.",
+  "confirm.alreadyDone": "These are already marked. Nothing more to do.",
+  "confirm.openApp": "Open Kinloop",
+  "email.hello": "Hello {name},",
   "email.dueSubject": "Time for your {time} medicines",
   "email.missedSubject": "Your {time} medicines are still waiting",
   "email.dueIntro": "It's time for:",
+  "email.missedIntro": "These are not marked yet:",
   "email.confirmCta": "I've taken them",
+  "email.confirmHint":
+    "Press the button once you have taken them. It opens a page with one button.",
+  "email.circleSubject": "{elder} hasn't marked the {time} medicines",
+  "email.circleIntro": "{elder} hasn't marked these as taken yet, and was reminded twice:",
+  "email.circleCta": "I'll check on {elder}",
+  "email.circleHint": "Pressing the button tells everyone in the circle that you are handling it.",
+  "email.apptSubject24": "Appointment tomorrow: {doctor} at {time}",
+  "email.apptSubject2": "Appointment in 2 hours: {doctor} at {time}",
+  "email.apptIntro": "A reminder about {elder}'s appointment:",
+  "email.apptCalendar": "Add to Google Calendar",
+  "email.testSubject": "Kinloop test reminder",
+  "email.testIntro":
+    "This is a test from Kinloop. Reminders for {elder}'s care circle will reach you here.",
+  "email.footer": "You get this because you are in {elder}'s care circle on Kinloop.",
+  "email.openApp": "Open Kinloop",
 } as const;
 
 export type MessageKey = keyof typeof en;
