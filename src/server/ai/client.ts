@@ -124,8 +124,8 @@ function gemini(apiKey: string, model: string): AiClient {
           responseJsonSchema: request.jsonSchema,
           temperature: 0,
           maxOutputTokens: 4096,
-          // Reading a label or a prescription needs little reasoning; low thinking keeps it ~2 s.
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+          // Reading a label or a prescription needs little reasoning; minimal thinking keeps it fast.
+          thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
           abortSignal: signal,
         },
       });
