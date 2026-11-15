@@ -8,6 +8,7 @@ import { FormMessage, SubmitButton } from "@/components/common/submit-button";
 import { AiLabel, Sparkle } from "@/components/signature/sparkle";
 import { buttonClass } from "@/components/ui/button";
 import { ChoiceGroup, TextArea, TextField } from "@/components/ui/field";
+import { shortDate } from "@/domain/time";
 import type { ActionResult } from "@/server/errors";
 import type { MedicineDraft } from "@/server/services/prescription-import";
 
@@ -131,7 +132,7 @@ function DraftCard({
           error={errors.daysOfWeek}
         />
         <p className="text-base text-muted">
-          Starts today{draft.endDate ? `, ends ${draft.endDate}` : ", no end date"}.
+          Starts today{draft.endDate ? `, ends ${shortDate(draft.endDate)}` : ", no end date"}.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           <SubmitButton pendingText="Adding…" size="lg">

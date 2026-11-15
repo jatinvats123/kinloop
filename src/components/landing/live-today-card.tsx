@@ -17,7 +17,10 @@ export function LiveTodayCard() {
 
   return (
     <div className="relative w-full max-w-md">
-      <div aria-hidden="true" className="pointer-events-none absolute -left-24 -top-28 opacity-90">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-16 -top-16 opacity-90 lg:-left-24 lg:-top-28"
+      >
         <DayBloom total={SLOTS.length} done={done} size="xl" tone="dark" breathing />
       </div>
       <section

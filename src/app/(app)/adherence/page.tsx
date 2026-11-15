@@ -51,7 +51,7 @@ export default async function AdherencePage({
           </nav>
         }
       />
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+      <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.2fr]">
         <Card aria-labelledby="overall-h">
           <CardHeader id="overall-h" title={`Last ${days} days`} />
           <p className="numeral text-6xl">

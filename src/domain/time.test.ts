@@ -3,6 +3,7 @@ import {
   addDays,
   clockLabel,
   dateRange,
+  shortDate,
   dayPart,
   greetingPart,
   isValidTimeZone,
@@ -108,5 +109,12 @@ describe("labels", () => {
 
   it("writes a long date", () => {
     expect(longDate("2026-11-14T06:00:00Z", IST)).toBe("Saturday 14 November");
+  });
+});
+
+describe("shortDate", () => {
+  it("formats a calendar date as day and short month", () => {
+    expect(shortDate("2026-11-03")).toBe("3 Nov");
+    expect(shortDate("2027-01-31")).toBe("31 Jan");
   });
 });

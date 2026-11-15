@@ -3,7 +3,7 @@
 import { computeAdherence } from "./adherence";
 import { indexLogs, logId, slotsForRange } from "./schedule";
 import { isPastMissedThreshold } from "./status";
-import { addDays, to12h, todayIn, zonedParts } from "./time";
+import { addDays, shortDate, to12h, todayIn, zonedParts } from "./time";
 import type { Appointment, Circle, DoseLog, Item, SkipReason } from "./types";
 
 /** How many days of history the brief summarises. */
@@ -47,13 +47,6 @@ export interface BriefFacts {
     instructions: string;
     paused: boolean;
   }>;
-}
-
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-/** "2026-11-13" → "13 Nov". */
-export function shortDate(date: string): string {
-  return `${Number(date.slice(8, 10))} ${MONTHS[Number(date.slice(5, 7)) - 1] ?? ""}`;
 }
 
 const label = (item: Item | undefined) =>

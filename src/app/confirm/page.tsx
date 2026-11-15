@@ -61,7 +61,7 @@ export default async function ConfirmPage({
       <LinkActionForm
         action={confirmLinkAction}
         token={token}
-        label={t("confirm.button")}
+        label={t(open.length === 1 ? "confirm.buttonOne" : "confirm.button")}
         pendingText={t("confirm.saving")}
         doneText={open.length === 0 ? t("confirm.alreadyDone") : undefined}
       />

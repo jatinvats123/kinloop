@@ -86,7 +86,7 @@ export default async function CirclePage({
           )}
         </div>
       </Card>
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-2">
         <Card aria-labelledby="profile-h">
           <CardHeader
             id="profile-h"

@@ -159,3 +159,10 @@ export function longDate(instant: Date | string, zone: string): string {
 export function shortWeekday(date: string): string {
   return ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][weekdayOf(date)] ?? "";
 }
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** "2026-11-13" → "13 Nov". */
+export function shortDate(date: string): string {
+  return `${Number(date.slice(8, 10))} ${MONTHS[Number(date.slice(5, 7)) - 1] ?? ""}`;
+}

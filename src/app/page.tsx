@@ -19,11 +19,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
       <header className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5 sm:px-8">
         <Logo tone="dark" />
         <nav aria-label="Account">
-          <ul className="flex items-center gap-2">
+          <ul className="flex items-center gap-1 sm:gap-2">
             <li>
               <Link
                 href="/sign-in"
-                className="inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold text-stage ring-1 ring-inset ring-stage/30 hover:ring-lime"
+                className="inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-3 text-sm font-semibold text-stage ring-1 sm:px-4 ring-inset ring-stage/30 hover:ring-lime"
               >
                 Sign in
               </Link>
@@ -31,7 +31,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
             <li>
               <Link
                 href="/start"
-                className="inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold text-lime underline-offset-4 hover:underline"
+                className="inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-3 text-sm font-semibold text-lime sm:px-4 underline-offset-4 hover:underline"
               >
                 Create a circle
               </Link>
@@ -44,7 +44,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
         id="main"
         className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pt-6 pb-16 sm:px-8 lg:grid-cols-[1.05fr_1fr] lg:pt-16"
       >
-        <section aria-labelledby="hero" className="flex flex-col gap-7">
+        <section aria-labelledby="hero" className="relative z-10 flex flex-col gap-7">
           <h1
             id="hero"
             className="text-4xl font-light leading-[1.05] tracking-tight sm:text-5xl lg:text-[4.25rem]"
@@ -53,8 +53,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
             <span className="font-semibold text-lime">in one calm circle.</span>
           </h1>
           <p className="max-w-[34ch] text-xl text-muted-dark">
-            The elder stays in charge. Everyone who cares can see what&apos;s done and what&apos;s
-            missed.
+            For older people and the family and caretakers who help them. The elder stays in charge;
+            everyone in the circle sees what&apos;s done and what&apos;s missed.
           </p>
           <form action={startDemoAction}>
             <SubmitButton
@@ -99,9 +99,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
             </span>
           </li>
           <li className="max-w-[32ch]">
-            <span className="font-semibold text-lime">One passcode each.</span>{" "}
+            <span className="font-semibold text-lime">&ldquo;Is this the right one?&rdquo;</span>{" "}
             <span className="text-muted-dark">
-              No accounts or apps to install, just a circle code and a 6-digit passcode.
+              Photograph the strip before a dose. Kinloop checks it against her schedule and catches
+              a double dose.
             </span>
           </li>
         </ul>

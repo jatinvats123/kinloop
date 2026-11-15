@@ -58,6 +58,7 @@ export const en = {
     "This tells you whether the label matches your schedule. It is not medical advice.",
   "confirm.title": "Confirm your {time} medicines",
   "confirm.button": "Yes, I've taken them",
+  "confirm.buttonOne": "Yes, I've taken it",
   "confirm.done": "Thank you. Your circle can see it's done.",
   "confirm.expired": "This link has expired. Open Kinloop to mark your medicines.",
   "confirm.invalid": "This link isn't valid. Open Kinloop to mark your medicines.",

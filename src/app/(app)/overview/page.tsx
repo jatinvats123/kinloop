@@ -36,7 +36,7 @@ export default async function OverviewPage() {
         </h1>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
+      <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1.15fr_1fr]">
         <div className="flex flex-col gap-6">
           <Card aria-labelledby="today-h">
             <CardHeader
