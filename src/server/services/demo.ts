@@ -22,8 +22,10 @@ export function dueSoonTime(now: Date, zone: string): string {
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
-function demoItems(today: string, now: Date, createdAt: string): Item[] {
+function demoItems(today: string, now: Date): Item[] {
   const start = addDays(today, -HISTORY_DAYS);
+  // The items exist since the start of the history, like a circle that has been in use for ten days.
+  const createdAt = zonedToUtc(start, "00:00", ZONE).toISOString();
   const base = {
     daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
     startDate: start,
@@ -137,7 +139,6 @@ export interface DemoCircle {
 
 /** Creates a fresh, isolated demo circle and returns its code and the elder's member ID. */
 export async function createDemoCircle(repo: Repository, now: Date): Promise<DemoCircle> {
-  const createdAt = now.toISOString();
   const today = todayIn(ZONE, now);
   const alerts = { missed: true, appointments: true };
   const kamla = await newMemberRecord(
@@ -160,7 +161,7 @@ export async function createDemoCircle(repo: Repository, now: Date): Promise<Dem
     now,
   );
   const members: Member[] = [kamla.member, priya.member, ramesh.member];
-  const items = demoItems(today, now, createdAt);
+  const items = demoItems(today, now);
   const logs = demoLogs(items, today, now, { elder: kamla.member.id, priya: priya.member.id });
   const appointments: Appointment[] = [
     {
