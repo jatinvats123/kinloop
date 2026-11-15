@@ -46,6 +46,8 @@ describe("normaliseName", () => {
     expect(normaliseName("AMLODIPINE BESYLATE TABS")).toBe("amlodipine");
     expect(normaliseName("Levothyroxine Sodium Tablets USP")).toBe("levothyroxine");
     expect(normaliseName("Glycomet-SR 500")).toBe("glycomet");
+    expect(normaliseName("Amlodipine Besylate IP eq. to Amlodipine")).toBe("amlodipine");
+    expect(normaliseName("Amlodipine besilate equivalent to amlodipine 5 mg")).toBe("amlodipine");
   });
 
   it("splits combination compositions into ingredients", () => {

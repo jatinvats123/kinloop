@@ -102,7 +102,9 @@ const FILLER = new Set([
  * becomes "metformin".
  */
 export function normaliseName(name: string): string {
-  return name
+  // "Amlodipine Besylate IP eq. to Amlodipine" names the active moiety after "eq. to".
+  const active = name.split(/\b(?:eq|equiv|equivalent)\.?\s+to\b/i).pop() ?? name;
+  return active
     .toLowerCase()
     .replaceAll(".", "")
     .replace(/[^a-z\s]/g, " ")

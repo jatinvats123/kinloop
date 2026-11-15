@@ -3,7 +3,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, ScanLine } from "lucide-react";
 import { setTextSizeAction } from "@/app/actions/prefs";
 import {
   decideProposalAction,
@@ -17,6 +17,7 @@ import { ReadAloud, TextSizeControl } from "@/components/today/comfort-controls"
 import { ProposalCards } from "@/components/today/proposal-cards";
 import { SkipForm } from "@/components/today/skip-form";
 import { TakeSlotForm } from "@/components/today/take-slot-form";
+import { buttonClass } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { t, type MessageKey } from "@/domain/messages";
 import { can } from "@/domain/permissions";
@@ -124,6 +125,11 @@ export default async function TodayPage() {
           />
         </div>
       </section>
+
+      <Link href="/check" className={buttonClass("lime", "lg", "min-h-16 w-full text-xl")}>
+        <ScanLine aria-hidden="true" size={26} />
+        {t("check.open")}
+      </Link>
 
       <ProposalCards
         proposals={proposals}

@@ -19,6 +19,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   serverExternalPackages: ["@google-cloud/firestore", "nodemailer"],
+  // Label and prescription photos are resized in the browser; the server still caps images at 4 MB.
+  experimental: { serverActions: { bodySizeLimit: "4.5mb" } },
   turbopack: {
     rules: {
       "*.css": {

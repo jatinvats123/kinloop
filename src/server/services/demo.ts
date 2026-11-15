@@ -50,7 +50,8 @@ function demoItems(today: string, now: Date, createdAt: string): Item[] {
       composition: "Amlodipine besylate",
       dose: "5 mg",
       instructions: "One tablet with water",
-      times: ["08:00"],
+      // Shares the due-soon slot with the blood pressure check, so a medicine is always due in the demo.
+      times: [dueSoonTime(now, ZONE)],
     },
     {
       ...base,
