@@ -5,10 +5,16 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { CalendarDays } from "lucide-react";
 import { setTextSizeAction } from "@/app/actions/prefs";
-import { skipItemAction, takeSlotAction, undoLogAction } from "@/app/actions/care";
+import {
+  decideProposalAction,
+  skipItemAction,
+  takeSlotAction,
+  undoLogAction,
+} from "@/app/actions/care";
 import { DayBloom } from "@/components/signature/day-bloom";
 import { SlotCard, type SlotCardItem } from "@/components/signature/slot-card";
 import { ReadAloud, TextSizeControl } from "@/components/today/comfort-controls";
+import { ProposalCards } from "@/components/today/proposal-cards";
 import { SkipForm } from "@/components/today/skip-form";
 import { TakeSlotForm } from "@/components/today/take-slot-form";
 import { Card } from "@/components/ui/card";
@@ -17,6 +23,7 @@ import { can } from "@/domain/permissions";
 import { clockLabel, greetingPart, longDate, to12h } from "@/domain/time";
 import { SKIP_REASONS, type SlotStatus } from "@/domain/types";
 import { requireSession } from "@/server/auth/session";
+import { listPendingProposals } from "@/server/services/proposals";
 import { buildToday, type TodayGroup } from "@/server/services/read-models";
 
 export const metadata: Metadata = { title: "Today" };
@@ -53,7 +60,10 @@ function itemName(i: TodayGroup["items"][number]): string {
 export default async function TodayPage() {
   const ctx = await requireSession();
   const { circle, member } = ctx;
-  const view = await buildToday(ctx.repo, circle, ctx.now);
+  const [view, proposals] = await Promise.all([
+    buildToday(ctx.repo, circle, ctx.now),
+    listPendingProposals(ctx),
+  ]);
   const canLog = can(member, "log-dose");
   const isElder = member.role === "elder";
   const firstName = circle.elderName.split(" ")[0] ?? circle.elderName;
@@ -114,6 +124,13 @@ export default async function TodayPage() {
           />
         </div>
       </section>
+
+      <ProposalCards
+        proposals={proposals}
+        canDecide={isElder}
+        elderFirstName={firstName}
+        action={decideProposalAction}
+      />
 
       {view.groups.length === 0 ? (
         <Card>

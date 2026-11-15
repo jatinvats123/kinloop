@@ -1,8 +1,9 @@
 // The care circle: health profile, members with their access and alerts, and your own passcode.
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BellRing, Eye, PencilLine, ShieldCheck, UserPlus } from "lucide-react";
-import { regeneratePasscodeAction } from "@/app/actions/care";
+import { BellRing, Eye, Hand, PencilLine, ShieldCheck, UserPlus } from "lucide-react";
+import { regeneratePasscodeAction, setApprovalAction } from "@/app/actions/care";
+import { SubmitButton } from "@/components/common/submit-button";
 import { PageHeader, SavedNotice } from "@/components/common/page-header";
 import { RegeneratePasscodeForm } from "@/components/care/member-forms";
 import { buttonClass } from "@/components/ui/button";
@@ -54,6 +55,37 @@ export default async function CirclePage({
         }
       />
       <SavedNotice show={(await searchParams).saved === "1"} />
+      <Card aria-labelledby="ask-h" className="mb-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 id="ask-h" className="flex items-center gap-2 text-xl font-semibold">
+              <Hand aria-hidden="true" size={22} />
+              Ask me first:{" "}
+              <span className={circle.approvalRequired ? "text-olive" : "text-muted"}>
+                {circle.approvalRequired ? "On" : "Off"}
+              </span>
+            </h2>
+            <p className="mt-1 max-w-[60ch] text-base text-muted">
+              {circle.approvalRequired
+                ? `Changes to medicines and routines by others wait for ${circle.elderName.split(" ")[0]} to approve them on Today.`
+                : `Members with edit access can change medicines and routines straight away.`}
+            </p>
+          </div>
+          {can(member, "change-settings") ? (
+            <form action={setApprovalAction} className="shrink-0">
+              <input type="hidden" name="on" value={circle.approvalRequired ? "false" : "true"} />
+              <SubmitButton variant={circle.approvalRequired ? "secondary" : "primary"}>
+                {circle.approvalRequired ? "Turn off" : "Turn on"}
+                <span className="sr-only"> Ask me first</span>
+              </SubmitButton>
+            </form>
+          ) : (
+            <p className="text-sm text-muted">
+              Only {circle.elderName.split(" ")[0]} can change this.
+            </p>
+          )}
+        </div>
+      </Card>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card aria-labelledby="profile-h">
           <CardHeader

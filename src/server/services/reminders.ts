@@ -50,11 +50,7 @@ export async function buildRemindersView(ctx: Ctx): Promise<RemindersView> {
 }
 
 const testSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .pipe(z.email("Enter a valid email address").max(120)),
+  email: z.string().trim().toLowerCase().pipe(z.email("Enter a valid email address").max(120)),
 });
 
 /**

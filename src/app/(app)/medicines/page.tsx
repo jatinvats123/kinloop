@@ -21,7 +21,7 @@ function days(item: Item): string {
 export default async function MedicinesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ saved?: string; proposed?: string }>;
 }) {
   const ctx = await requireSession();
   const items = (await ctx.repo.listItems(ctx.circle.code)).sort(
@@ -52,6 +52,10 @@ export default async function MedicinesPage({
         }
       />
       <SavedNotice show={(await searchParams).saved === "1"} />
+      <SavedNotice
+        show={(await searchParams).proposed === "1"}
+        text={`Sent to ${ctx.circle.elderName.split(" ")[0]} for approval. It will apply once approved.`}
+      />
       {items.length === 0 ? (
         <p className="rounded-card bg-card p-6 text-lg shadow-card">
           Nothing here yet. Add the first medicine or routine to build Today.

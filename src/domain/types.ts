@@ -159,7 +159,8 @@ export interface Proposal {
   id: string;
   kind: ProposalKind;
   itemId: string | null;
-  payload: ItemDraft | null;
+  /** Item fields; `active` is set for pause and resume. */
+  payload: (ItemDraft & { active?: boolean }) | null;
   summary: string;
   proposedBy: string;
   proposedByName: string;

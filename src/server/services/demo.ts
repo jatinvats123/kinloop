@@ -5,7 +5,7 @@ import { demo } from "@/domain/config";
 import { formatCircleCode } from "@/domain/codes";
 import { logId, slotsForRange } from "@/domain/schedule";
 import { addDays, todayIn, zonedParts, zonedToUtc } from "@/domain/time";
-import type { ActivityEntry, Appointment, DoseLog, Item, Member } from "@/domain/types";
+import type { ActivityEntry, Appointment, DoseLog, Item, Member, Proposal } from "@/domain/types";
 import { AppError } from "@/server/errors";
 import { newCircleCode, newId } from "@/server/auth/passcode";
 import type { Repository } from "@/server/repositories/repository";
@@ -215,11 +215,47 @@ export async function createDemoCircle(repo: Repository, now: Date): Promise<Dem
     },
   ];
 
+  // "Ask me first" is on, and Priya has suggested a weekly vitamin D that waits for Kamla.
+  const proposals: Proposal[] = [
+    {
+      id: newId(),
+      kind: "add",
+      itemId: null,
+      payload: {
+        kind: "medicine",
+        name: "Vitamin D3",
+        composition: "Cholecalciferol",
+        dose: "60000 IU",
+        instructions: "One sachet in milk, Sunday mornings",
+        times: ["09:00"],
+        daysOfWeek: [0],
+        startDate: today,
+        endDate: null,
+      },
+      summary: "add medicine Vitamin D3 60000 IU at 09:00 on Sundays",
+      proposedBy: priya.member.id,
+      proposedByName: "Priya",
+      status: "pending",
+      createdAt: at(45),
+      decidedAt: null,
+    },
+  ];
+  activity.unshift({
+    id: `a0-${newId()}`,
+    actorId: priya.member.id,
+    actor: "Priya",
+    action: "proposal.created",
+    summary:
+      "Proposed: add medicine Vitamin D3 60000 IU at 09:00 on Sundays (waiting for Kamla's OK)",
+    at: at(45),
+  });
+
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const code = newCircleCode();
     const circle = {
       ...newCircleRecord(code, "Kamla Devi", ZONE, now),
       isDemo: true,
+      approvalRequired: true,
       expiresAt: new Date(now.getTime() + demo.ttlHours * 3600_000).toISOString(),
       profile: {
         conditions: ["Type 2 diabetes", "High blood pressure", "Hypothyroidism"],
@@ -235,7 +271,9 @@ export async function createDemoCircle(repo: Repository, now: Date): Promise<Dem
         [ramesh.member.id]: ramesh.passcode,
       },
     };
-    if (await repo.createCircle({ circle, members, items, logs, appointments, activity })) {
+    if (
+      await repo.createCircle({ circle, members, items, logs, appointments, activity, proposals })
+    ) {
       return { code, elderId: kamla.member.id };
     }
   }

@@ -19,6 +19,7 @@ import {
   updateMember,
   updateProfile,
 } from "@/server/services/members";
+import { decideProposal, isProposal, setApprovalRequired } from "@/server/services/proposals";
 import { formToObject } from "@/server/validation";
 
 const id = (fd: FormData, key = "id") => String(fd.get(key) ?? "");
@@ -66,29 +67,46 @@ export async function undoLogAction(fd: FormData): Promise<void> {
 /* Medicines and routines */
 
 export async function saveItemAction(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
+  let proposed = false;
   try {
     const ctx = await requireSession();
     const input = formToObject(fd, ["times", "daysOfWeek"]);
-    if (id(fd)) await updateItem(ctx, id(fd), input);
-    else await createItem(ctx, input);
+    const result = id(fd) ? await updateItem(ctx, id(fd), input) : await createItem(ctx, input);
+    proposed = isProposal(result);
     refresh();
   } catch (err) {
     return toActionError(err);
   }
-  redirect("/medicines?saved=1");
+  redirect(proposed ? "/medicines?proposed=1" : "/medicines?saved=1");
 }
 
 export async function toggleItemAction(fd: FormData): Promise<void> {
   const ctx = await requireSession();
-  await setItemActive(ctx, id(fd), fd.get("active") === "true");
+  const proposal = await setItemActive(ctx, id(fd), fd.get("active") === "true");
   refresh();
+  if (proposal) redirect("/medicines?proposed=1");
 }
 
 export async function deleteItemAction(fd: FormData): Promise<void> {
   const ctx = await requireSession();
-  await deleteItem(ctx, id(fd));
+  const proposal = await deleteItem(ctx, id(fd));
   refresh();
-  redirect("/medicines");
+  redirect(proposal ? "/medicines?proposed=1" : "/medicines");
+}
+
+/* Ask me first */
+
+export async function decideProposalAction(fd: FormData): Promise<void> {
+  const ctx = await requireSession();
+  const decision = fd.get("decision") === "approved" ? "approved" : "declined";
+  await decideProposal(ctx, id(fd), decision);
+  refresh();
+}
+
+export async function setApprovalAction(fd: FormData): Promise<void> {
+  const ctx = await requireSession();
+  await setApprovalRequired(ctx, fd.get("on") === "true");
+  refresh();
 }
 
 /* Appointments */
