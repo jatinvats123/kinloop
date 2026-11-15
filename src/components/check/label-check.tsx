@@ -1,7 +1,7 @@
 "use client";
 // The right-medicine check flow: take or choose a photo (camera on phones) or a sample label, resize
 // it in the browser, send it, then show the verdict in very large type with one action.
-import { useActionState, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { Camera, RotateCcw } from "lucide-react";
 import { VerdictPanel, type VerdictTone } from "@/components/signature/verdict-panel";
 import { TakeSlotForm } from "@/components/today/take-slot-form";
@@ -58,7 +58,9 @@ export function LabelCheck({
   const [preparing, setPreparing] = useState(false);
   const [shown, setShown] = useState(true);
   const input = useRef<HTMLInputElement>(null);
+  const outcome = useRef<HTMLDivElement>(null);
   const busy = pending || preparing;
+
 
   async function send(file: Blob) {
     setPreparing(true);
@@ -76,6 +78,10 @@ export function LabelCheck({
   }
 
   const result = shown && !busy && state ? state : null;
+  // Keyboard and screen-reader users land on the answer instead of losing focus to the page.
+  useEffect(() => {
+    if (result) outcome.current?.focus();
+  }, [result]);
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
@@ -129,43 +135,45 @@ export function LabelCheck({
         {busy ? strings.checking : ""}
       </p>
 
-      {result && !result.ok ? (
-        <p role="alert" className="rounded-card bg-blush p-6 text-xl font-semibold text-ink">
-          {result.fieldErrors?.photo ?? result.error}
-        </p>
-      ) : null}
+      <div ref={outcome} tabIndex={-1} className="flex flex-col gap-4 outline-none">
+        {result && !result.ok ? (
+          <p role="alert" className="rounded-card bg-blush p-6 text-xl font-semibold text-ink">
+            {result.fieldErrors?.photo ?? result.error}
+          </p>
+        ) : null}
 
-      {result?.ok && result.data ? (
-        <VerdictPanel
-          tone={TONE[result.data.verdict]}
-          sentence={result.data.message}
-          action={
-            <div className="flex w-full flex-col gap-3">
-              {result.data.mark ? (
-                <TakeSlotForm
-                  action={takeAction}
-                  slotAt={result.data.mark.slotAt}
-                  items={[{ id: result.data.mark.itemId, name: "", needsReading: false }]}
-                  label={strings.markTaken}
-                  primary
-                  readingLabel=""
-                />
-              ) : null}
-              <button
-                type="button"
-                onClick={() => {
-                  setShown(false);
-                  input.current?.focus();
-                }}
-                className={buttonClass("secondary", "lg", "w-full")}
-              >
-                <RotateCcw aria-hidden="true" size={20} />
-                {strings.again}
-              </button>
-            </div>
-          }
-        />
-      ) : null}
+        {result?.ok && result.data ? (
+          <VerdictPanel
+            tone={TONE[result.data.verdict]}
+            sentence={result.data.message}
+            action={
+              <div className="flex w-full flex-col gap-3">
+                {result.data.mark ? (
+                  <TakeSlotForm
+                    action={takeAction}
+                    slotAt={result.data.mark.slotAt}
+                    items={[{ id: result.data.mark.itemId, name: "", needsReading: false }]}
+                    label={strings.markTaken}
+                    primary
+                    readingLabel=""
+                  />
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShown(false);
+                    input.current?.focus();
+                  }}
+                  className={buttonClass("secondary", "lg", "w-full")}
+                >
+                  <RotateCcw aria-hidden="true" size={20} />
+                  {strings.again}
+                </button>
+              </div>
+            }
+          />
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -88,7 +88,7 @@ export function TourPanel({
           <input type="hidden" name="hidden" value="1" />
           <button
             type="submit"
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ring-1 ring-inset ring-ink/20 hover:ring-ink/50"
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-semibold ring-1 ring-inset ring-ink/20 hover:ring-ink/50"
           >
             <X aria-hidden="true" size={16} />
             Hide tour
