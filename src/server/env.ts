@@ -11,7 +11,7 @@ const schema = z.object({
   FIREBASE_SERVICE_ACCOUNT: z.string().optional(),
   APP_URL: z.url().optional(),
   GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
+  GEMINI_MODEL: z.string().default("gemini-3.5-flash"),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   MAIL_FROM: z.string().optional(),
