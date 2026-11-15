@@ -29,7 +29,7 @@ export function DemoPanel({
             <span className="sr-only"> (currently {current.name})</span>
           </p>
         </div>
-        <ul className="flex flex-wrap gap-2">
+        <ul className="flex flex-wrap gap-2" aria-label="Switch person">
           {members.map((m) => {
             const active = m.id === current.id;
             return (
@@ -42,7 +42,9 @@ export function DemoPanel({
                     className={`inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors ${active ? "bg-lime text-ink" : "bg-canvas text-stage ring-1 ring-inset ring-stage/25 hover:ring-lime"}`}
                   >
                     {m.name}
-                    <span className={active ? "text-ink/80" : "text-muted-dark"}>
+                    <span
+                      className={`sr-only sm:not-sr-only ${active ? "text-ink/80" : "text-muted-dark"}`}
+                    >
                       {roleLabel[m.role]}
                       {m.role !== "elder" ? `, ${m.access}` : ""}
                     </span>
