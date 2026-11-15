@@ -1,7 +1,11 @@
 // Signed-in shell: dark canvas, the light stage holding the page, role-aware navigation and demo controls.
+import { cookies } from "next/headers";
 import { LogOut } from "lucide-react";
 import { signOutAction, switchRoleAction } from "@/app/actions/auth";
+import { setTourHiddenAction } from "@/app/actions/prefs";
 import { DemoPanel } from "@/components/shell/demo-panel";
+import { TourPanel } from "@/components/shell/tour-panel";
+import { tourProgress, tourSteps } from "@/domain/tour";
 import { Logo } from "@/components/shell/logo";
 import { NavTabs, type NavItem } from "@/components/shell/nav-tabs";
 import { homeFor, requireSession } from "@/server/auth/session";
@@ -23,7 +27,20 @@ const circleNav: NavItem[] = [
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await requireSession();
-  const members = ctx.circle.isDemo ? await ctx.repo.listMembers(ctx.circle.code) : [];
+  const demo = ctx.circle.isDemo;
+  const tourHidden = (await cookies()).get("kl_tour")?.value === "hidden";
+  const [members, activity, nextAppts] = demo
+    ? await Promise.all([
+        ctx.repo.listMembers(ctx.circle.code),
+        tourHidden ? Promise.resolve([]) : ctx.repo.listActivity(ctx.circle.code, 60),
+        tourHidden
+          ? Promise.resolve([])
+          : ctx.repo.listAppointments(ctx.circle.code, ctx.now.toISOString(), 1),
+      ])
+    : [[], [], []];
+  const steps = tourSteps(
+    nextAppts[0] ? `/appointments/${nextAppts[0].id}/brief` : "/appointments",
+  );
   const nav = ctx.member.role === "elder" ? elderNav : circleNav;
 
   return (
@@ -44,7 +61,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </button>
           </form>
         </header>
-        {ctx.circle.isDemo ? (
+        {demo ? (
           <div className="relative px-4 pt-4 sm:px-8 print:hidden">
             <DemoPanel
               circle={ctx.circle}
@@ -52,6 +69,28 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               current={ctx.member}
               switchAction={switchRoleAction}
             />
+            <div className="mt-3">
+              {tourHidden ? (
+                <form action={setTourHiddenAction}>
+                  <input type="hidden" name="hidden" value="0" />
+                  <button
+                    type="submit"
+                    className="inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-ink/20 hover:ring-ink/50"
+                  >
+                    Show the two-minute tour
+                  </button>
+                </form>
+              ) : (
+                <TourPanel
+                  steps={steps}
+                  done={tourProgress(activity, members, ctx.circle.createdAt)}
+                  current={ctx.member}
+                  members={members}
+                  switchAction={switchRoleAction}
+                  hideAction={setTourHiddenAction}
+                />
+              )}
+            </div>
           </div>
         ) : null}
         <main id="main" className="relative flex-1 px-4 py-6 sm:px-8 sm:py-8">

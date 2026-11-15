@@ -90,6 +90,18 @@ describe("openVisitBrief", () => {
     expect(brief.draft).toBeNull();
     const [entry] = await repo.listActivity(CODE, 1);
     expect(entry).toMatchObject({ action: "brief.opened", actor: "Ramesh" });
+    expect(brief.recorded).toBe(true);
+  });
+
+  it("records re-opening the same brief only once per ten minutes", async () => {
+    await openVisitBrief(await ctx(), "a1");
+    expect(
+      (await openVisitBrief(await ctx("m-elder", new Date(NOW.getTime() + 60_000)), "a1")).recorded,
+    ).toBe(false);
+    const later = new Date(NOW.getTime() + 11 * 60_000);
+    expect((await openVisitBrief(await ctx("m-elder", later), "a1")).recorded).toBe(true);
+    const opened = (await repo.listActivity(CODE, 10)).filter((a) => a.action === "brief.opened");
+    expect(opened).toHaveLength(2);
   });
 
   it("reports a missing appointment as not found", async () => {

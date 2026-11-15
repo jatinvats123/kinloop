@@ -36,7 +36,7 @@ export async function checkLabelAction(
     const image = await readImage(fd.get("photo"));
     await limitCaller(ctx.repo, ctx.now);
     const result = await checkLabel(ctx, image, getAiClient());
-    revalidatePath("/activity");
+    revalidatePath("/", "layout");
     return { ok: true, data: result };
   } catch (err) {
     return toActionError(err);
@@ -54,6 +54,7 @@ export async function draftPrescriptionAction(
     await limitCaller(ctx.repo, ctx.now);
     const text = String(fd.get("text") ?? "");
     const drafts = await draftFromPrescription(ctx, { text, image }, getAiClient());
+    revalidatePath("/", "layout");
     return { ok: true, data: drafts };
   } catch (err) {
     return toActionError(err);

@@ -151,10 +151,14 @@ function DraftCard({
 export function PrescriptionImport({
   draftAction,
   acceptAction,
+  sample,
 }: {
   draftAction: DraftAction;
   acceptAction: AcceptAction;
+  /** Demo circles only: a fictional prescription the visitor can paste with one click. */
+  sample?: string;
 }) {
+  const [prefill, setPrefill] = useState("");
   const [state, dispatch] = useActionState<ActionResult<MedicineDraft[]> | null, FormData>(
     (prev, fd) => draftAction(prev ?? { ok: true }, fd),
     null,
@@ -184,7 +188,18 @@ export function PrescriptionImport({
         }}
         noValidate
       >
+        {sample ? (
+          <button
+            type="button"
+            onClick={() => setPrefill(sample)}
+            className={buttonClass("secondary", "md", "self-start")}
+          >
+            Paste the sample prescription
+          </button>
+        ) : null}
         <TextArea
+          key={prefill}
+          defaultValue={prefill}
           label="Paste the prescription"
           name="text"
           rows={6}

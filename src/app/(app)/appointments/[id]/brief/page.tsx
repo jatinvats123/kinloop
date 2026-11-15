@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { draftBriefAction } from "@/app/actions/ai";
 import { BriefDraft, PrintButton } from "@/components/brief/brief-draft";
+import { RefreshOnce } from "@/components/brief/refresh-once";
 import { clockLabel, longDate } from "@/domain/time";
 import { AppError } from "@/server/errors";
 import { requireSession } from "@/server/auth/session";
@@ -48,6 +49,7 @@ export default async function VisitBriefPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-5">
+      {brief.recorded && ctx.circle.isDemo ? <RefreshOnce /> : null}
       <Link
         href="/appointments"
         className="inline-flex min-h-11 items-center gap-2 self-start text-base font-semibold underline-offset-4 hover:underline print:hidden"

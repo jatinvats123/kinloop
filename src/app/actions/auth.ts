@@ -60,13 +60,19 @@ export async function startDemoAction(): Promise<void> {
   redirect("/today");
 }
 
+/** True for a same-site path such as "/today" (never "//host" or a full URL). */
+function isLocalPath(path: string): boolean {
+  return /^\/[a-z][\w/-]*$/i.test(path);
+}
+
 export async function switchRoleAction(fd: FormData): Promise<void> {
   const ctx = await readSession();
   if (!ctx || !ctx.circle.isDemo) redirect("/sign-in");
   const target = await ctx.repo.getMember(ctx.circle.code, String(fd.get("memberId") ?? ""));
   if (!target) redirect(homeFor(ctx.member));
   await startSession(ctx.circle.code, target);
-  redirect(homeFor(target));
+  const next = String(fd.get("next") ?? "");
+  redirect(isLocalPath(next) ? next : homeFor(target));
 }
 
 export async function signOutAction(): Promise<void> {

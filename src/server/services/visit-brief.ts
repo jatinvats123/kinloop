@@ -10,11 +10,16 @@ import { writeBriefPoints } from "@/server/ai/brief-writer";
 import { reserveAi } from "@/server/ai/guards";
 import { recordActivity, requirePermission, type Ctx } from "./context";
 
+/** Re-opening the same brief within this window is not recorded again (keeps the feed calm). */
+const REOPEN_QUIET_MS = 10 * 60_000;
+
 export interface VisitBrief {
   appointment: Appointment;
   facts: BriefFacts;
   /** The cached AI draft, only when it was written from exactly these facts. */
   draft: BriefDraft | null;
+  /** True when this opening was newly recorded in the activity feed. */
+  recorded: boolean;
 }
 
 /** Stable SHA-256 of the facts; any change to the facts invalidates the cached draft. */
@@ -41,14 +46,27 @@ async function loadFacts(ctx: Ctx, appointmentId: string) {
 
 /**
  * Opens the brief for an appointment: computed facts plus any cached AI draft that still matches
- * them. Any member may open it; opening is recorded in the activity feed.
+ * them. Any member may open it; opening is recorded in the activity feed (once per 10 minutes).
  */
 export async function openVisitBrief(ctx: Ctx, appointmentId: string): Promise<VisitBrief> {
   requirePermission(ctx, "view");
   const { appointment, facts, factsHash } = await loadFacts(ctx, appointmentId);
-  const cached = await ctx.repo.getBriefDraft(ctx.circle.code, appointmentId);
-  await recordActivity(ctx, "brief.opened", `Opened the visit brief for ${appointment.doctor}`);
-  return { appointment, facts, draft: cached?.factsHash === factsHash ? cached : null };
+  const [cached, recent] = await Promise.all([
+    ctx.repo.getBriefDraft(ctx.circle.code, appointmentId),
+    ctx.repo.listActivity(ctx.circle.code, 5),
+  ]);
+  const summary = `Opened the visit brief for ${appointment.doctor}`;
+  const since = new Date(ctx.now.getTime() - REOPEN_QUIET_MS).toISOString();
+  const recorded = !recent.some(
+    (a) => a.actorId === ctx.member.id && a.summary === summary && a.at >= since,
+  );
+  if (recorded) await recordActivity(ctx, "brief.opened", summary);
+  return {
+    appointment,
+    facts,
+    draft: cached?.factsHash === factsHash ? cached : null,
+    recorded,
+  };
 }
 
 /**
