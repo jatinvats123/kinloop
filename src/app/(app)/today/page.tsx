@@ -110,6 +110,12 @@ export default async function TodayPage() {
             <p className="text-lg font-semibold" aria-live="polite">
               {progress}
             </p>
+            <Link
+              href="/adherence"
+              className="inline-flex min-h-11 items-center text-base font-semibold text-olive underline underline-offset-4"
+            >
+              {t("today.history")}
+            </Link>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">

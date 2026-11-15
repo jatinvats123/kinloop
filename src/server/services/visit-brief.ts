@@ -79,8 +79,10 @@ export async function draftVisitBrief(
   client: AiClient | null,
 ): Promise<BriefDraft> {
   requirePermission(ctx, "view");
-  const { facts, factsHash } = await loadFacts(ctx, appointmentId);
-  const cached = await ctx.repo.getBriefDraft(ctx.circle.code, appointmentId);
+  const [{ facts, factsHash }, cached] = await Promise.all([
+    loadFacts(ctx, appointmentId),
+    ctx.repo.getBriefDraft(ctx.circle.code, appointmentId),
+  ]);
   if (cached?.factsHash === factsHash) return cached;
   if (!client) {
     throw new AppError(

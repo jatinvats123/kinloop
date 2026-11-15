@@ -48,8 +48,10 @@ export async function takeSlot(
   requirePermission(ctx, "log-dose");
   const d = parseInput(takeSchema, input);
   const slotAt = new Date(d.slotAt).toISOString();
-  const items = await ctx.repo.listItems(ctx.circle.code);
-  const existing = await ctx.repo.listLogs(ctx.circle.code, slotAt, slotAt);
+  const [items, existing] = await Promise.all([
+    ctx.repo.listItems(ctx.circle.code),
+    ctx.repo.listLogs(ctx.circle.code, slotAt, slotAt),
+  ]);
   const taken = new Set(existing.filter((l) => l.status === "taken").map((l) => l.itemId));
 
   const logs: DoseLog[] = [];

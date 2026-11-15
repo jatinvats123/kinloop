@@ -7,6 +7,7 @@ import { logId, slotsForRange } from "@/domain/schedule";
 import { addDays, todayIn, zonedParts, zonedToUtc } from "@/domain/time";
 import type { ActivityEntry, Appointment, DoseLog, Item, Member, Proposal } from "@/domain/types";
 import { AppError } from "@/server/errors";
+import { mapLimit } from "@/server/concurrency";
 import { newCircleCode, newId } from "@/server/auth/passcode";
 import type { Repository } from "@/server/repositories/repository";
 import { newCircleRecord, newMemberRecord } from "./circles";
@@ -285,6 +286,6 @@ export async function createDemoCircle(repo: Repository, now: Date): Promise<Dem
 /** Deletes expired demo circles; called from the cron tick. Returns how many were removed. */
 export async function purgeExpiredDemos(repo: Repository, now: Date, limit = 20): Promise<number> {
   const codes = await repo.listExpiredDemoCircles(now.toISOString(), limit);
-  for (const code of codes) await repo.deleteCircle(code);
+  await mapLimit(codes, 4, (code) => repo.deleteCircle(code));
   return codes.length;
 }
