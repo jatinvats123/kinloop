@@ -2,6 +2,7 @@ name: Reminder tick
 
 # Calls the app's cron endpoint every 5 minutes. GitHub may run schedules late or skip a run under
 # load; the tick is window-based and idempotent, so a late or repeated call is safe.
+# Manual runs (workflow_dispatch) are used to demo the ladder on demand.
 on:
   schedule:
     - cron: "*/5 * * * *"
