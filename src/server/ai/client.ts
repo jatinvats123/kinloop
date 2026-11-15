@@ -79,7 +79,14 @@ export async function runAi<T>(
   let last: unknown;
   for (let i = 0; i < ATTEMPTS; i += 1) {
     try {
-      return parse(await attempt(client, request, timeoutMs), schema);
+      const started = Date.now();
+      const raw = await attempt(client, request, timeoutMs);
+      logger.info("ai call", {
+        attempt: i + 1,
+        ms: Date.now() - started,
+        image: Boolean(request.image),
+      });
+      return parse(raw, schema);
     } catch (err) {
       last = err;
       logger.warn("ai attempt failed", {
