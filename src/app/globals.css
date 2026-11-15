@@ -1,5 +1,154 @@
+/* Kinloop design tokens (CLAUDE.md §9a "calm futurism") and a few global primitives. */
 @import "tailwindcss";
 
-body {
-  font-family: var(--font-urbanist), system-ui, sans-serif;
+@theme {
+  --font-sans: var(--font-urbanist), ui-sans-serif, system-ui, sans-serif;
+
+  --color-canvas: #0b0c0a;
+  --color-canvas-raised: #171914;
+  --color-stage: #f5f5f8;
+  --color-card: #ffffff;
+  --color-ink: #111408;
+  --color-olive: #243100;
+  --color-olive-hover: #364a00;
+  --color-lime: #dbef90;
+  --color-lime-soft: #eef7c8;
+  --color-blush: #f4b8c1;
+  --color-blush-soft: #fbe3e7;
+  --color-muted: #4a4f45;
+  --color-muted-dark: #b9beb0;
+  --color-danger: #8a1c2b;
+  --color-line: #dcdfd4;
+  --color-line-dark: #2c2f27;
+
+  /* Type scale: nothing below 15px; body is 18px; elder screens use lg (20px) and up. */
+  --text-xs: 0.9375rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.45;
+  --text-base: 1.125rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.35;
+  --text-2xl: 2rem;
+  --text-2xl--line-height: 1.15;
+  --text-3xl: 2.75rem;
+  --text-3xl--line-height: 1.05;
+  --text-4xl: 3.5rem;
+  --text-4xl--line-height: 1;
+  --text-5xl: 4.5rem;
+  --text-5xl--line-height: 0.95;
+
+  --radius-card: 1.5rem;
+  --radius-stage: 2rem;
+
+  --shadow-card: 0 1px 2px rgb(17 20 8 / 0.05), 0 8px 24px -12px rgb(17 20 8 / 0.12);
+
+  --animate-breathe: breathe 7s ease-in-out infinite;
+  --animate-petal: petal 250ms ease-out both;
+
+  @keyframes breathe {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    50% {
+      transform: scale(1.045);
+      opacity: 1;
+    }
+  }
+  @keyframes petal {
+    from {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  html[data-text-size="large"] {
+    font-size: 112.5%;
+  }
+  html[data-text-size="larger"] {
+    font-size: 125%;
+  }
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    font-weight: 500;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-olive);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+  .on-dark :focus-visible,
+  .on-dark:focus-visible {
+    outline-color: var(--color-lime);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    z-index: 50;
+    background: var(--color-lime);
+    color: var(--color-ink);
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    border-radius: 999px;
+  }
+  .skip-link:focus {
+    top: 1rem;
+  }
+  /* Faint dot grid on the dark canvas (desktop). */
+  .dot-grid {
+    background-image: radial-gradient(rgb(219 239 144 / 0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  /* Soft olive-to-lime glow shape, always behind content. */
+  .glow {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 999px;
+    background: radial-gradient(closest-side, rgb(219 239 144 / 0.55), rgb(36 49 0 / 0) 100%);
+    filter: blur(48px);
+  }
+  .numeral {
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
 }
